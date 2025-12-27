@@ -2,7 +2,7 @@
 const SUPABASE_URL = "https://vzzzjrlbwpkgvhojdiyh.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZ6enpqcmxid3BrZ3Zob2pkaXloIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY4NDExNzgsImV4cCI6MjA4MjQxNzE3OH0.4LSiWfKEOG13hFZDekZMHlWT0wUFoxb07IetgRZO5TY";
 
-const supabaseClient = Supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY); // <-- lowercase 'supabase'
 
 // -------------------- 2. Fetch approved events --------------------
 async function getApprovedEvents() {
@@ -27,7 +27,7 @@ async function getApprovedEvents() {
 // -------------------- 3. Render calendar --------------------
 async function renderCalendar() {
   const calendar = document.getElementById("calendar");
-  calendar.innerHTML = ""; // clear previous calendar
+  calendar.innerHTML = "";
 
   const today = new Date();
   const currentMonth = today.getMonth();
@@ -37,10 +37,8 @@ async function renderCalendar() {
                       "July","August","September","October","November","December"];
   const dayNames = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
 
-  // Set month-year header
   document.getElementById("monthYear").textContent = monthNames[currentMonth] + " " + currentYear;
 
-  // Add day headers
   dayNames.forEach(d => {
     const header = document.createElement("div");
     header.className = "header";
@@ -51,14 +49,12 @@ async function renderCalendar() {
   const firstDay = new Date(currentYear, currentMonth, 1).getDay();
   const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
 
-  // Empty cells before first day
   for (let i = 0; i < firstDay; i++) {
     const emptyDiv = document.createElement("div");
     emptyDiv.className = "day";
     calendar.appendChild(emptyDiv);
   }
 
-  // Create day cells
   for (let day = 1; day <= daysInMonth; day++) {
     const dayDiv = document.createElement("div");
     dayDiv.className = "day";
@@ -72,7 +68,7 @@ async function renderCalendar() {
     calendar.appendChild(dayDiv);
   }
 
-  // Load approved events from Supabase
+  // Load approved events
   const events = await getApprovedEvents();
 
   events.forEach(ev => {
