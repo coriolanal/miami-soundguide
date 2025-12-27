@@ -1,222 +1,172 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>Miami Sound Guide Calendar</title>
-  <style>
-    body {
-      font-family: Verdana, sans-serif;
-      background-color: #111;
-      color: #eee;
-      text-align: center;
-      font-size: 13px;
-      margin: 0;
-      padding: 0;
+let displayedMonth;
+let displayedYear;
+
+console.log("🔥 script.js loaded");
+
+// -------------------- 1. Initialize Supabase --------------------
+const SUPABASE_URL = "https://vzzzjrlbwpkgvhojdiyh.supabase.co";
+const SUPABASE_ANON_KEY = "sb_publishable_iuM31qKUIoyTETDonSKXJw_aIRrZ2i-";
+
+const supabaseClient = supabase.createClient(
+  SUPABASE_URL,
+  SUPABASE_ANON_KEY
+);
+
+// -------------------- 2. Fetch approved events --------------------
+async function getApprovedEvents() {
+  try {
+    const { data, error } = await supabaseClient
+      .from("events")
+      .select("*")
+      .eq("status", "approved")
+      .order("date", { ascending: true });
+
+    if (error) {
+      console.error("Supabase fetch error:", error);
+      return [];
     }
 
-    h1#siteTitle {
-      font-size: 24px;
-      margin: 20px 0 10px 0;
-      text-transform: lowercase;
-      color: #ff5500; /* orange */
-      letter-spacing: 1px;
-      font-weight: bold; /* slightly bolder */
+    console.log("Approved events from Supabase:", data);
+    return data || [];
+  } catch (err) {
+    console.error("Supabase exception:", err);
+    return [];
+  }
+}
+
+// -------------------- 3. Render calendar --------------------
+async function renderCalendar() {
+  const calendar = document.getElementById("calendar");
+  calendar.innerHTML = "";
+
+  const currentMonth = month;
+  const currentYear = year;
+
+  console.log("Calendar rendering for:", {
+    month: currentMonth,
+    year: currentYear
+  });
+
+  const monthNames = [
+    "January","February","March","April","May","June",
+    "July","August","September","October","November","December"
+  ];
+
+  document.getElementById("monthYear").textContent =
+    monthNames[currentMonth] + " " + currentYear;
+
+  const firstDay = new Date(currentYear, currentMonth, 1).getDay();
+  const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+
+  // Empty placeholders
+  for (let i = 0; i < firstDay; i++) {
+    const emptyDiv = document.createElement("div");
+    emptyDiv.className = "day";
+    calendar.appendChild(emptyDiv);
+  }
+
+  // Actual day cells
+  for (let day = 1; day <= daysInMonth; day++) {
+    const dayDiv = document.createElement("div");
+    dayDiv.className = "day";
+    dayDiv.dataset.day = day;
+
+    const dn = document.createElement("div");
+    dn.className = "date-number";
+    dn.textContent = day;
+    dayDiv.appendChild(dn);
+
+    calendar.appendChild(dayDiv);
+  }
+
+  // Load approved events
+  const events = await getApprovedEvents();
+
+  events.forEach(ev => {
+    const evDate = new Date(ev.date + "T00:00:00");
+    const evDay = evDate.getUTCDate();
+    const evMonth = evDate.getUTCMonth();
+    const evYear = evDate.getUTCFullYear();
+
+    if (evMonth === currentMonth && evYear === currentYear) {
+      const dayDiv = Array.from(
+        calendar.querySelectorAll(".day[data-day]")
+      ).find(d => parseInt(d.dataset.day) === evDay);
+
+      if (dayDiv) {
+        const link = document.createElement("span");
+        link.className = "event-link";
+        link.textContent = ev.title;
+        link.onclick = () => openModal(ev);
+        dayDiv.appendChild(link);
+      }
     }
-    
-<!-- Month Navigation -->
-<div style="margin-bottom: 5px;">
-  <button id="prevMonth">&lt;</button>
-  <button id="nextMonth">&gt;</button>
-</div>
+  });
+}
 
-<!-- Month and Year Header -->
-<h2 id="monthYear"></h2>
+// -------------------- 4. Modal --------------------
+function openModal(ev) {
+  const modal = document.getElementById("eventModal");
+  const content = document.getElementById("modalContent");
 
-    
-    h2#monthYear {
-      font-size: 16px;
-      margin: 10px 0 5px 0;
+  content.innerHTML = `
+    <strong>${ev.title}</strong>
+    <p>${ev.mod_post || "No post available."}</p>
+  `;
+
+  modal.style.display = "block";
+}
+
+function closeModal() {
+  document.getElementById("eventModal").style.display = "none";
+}
+
+// -------------------- 5. DOM Ready --------------------
+document.addEventListener("DOMContentLoaded", async () => {
+  const today = new Date();
+  displayedMonth = today.getMonth();  // e.g., 11 for December
+  displayedYear = today.getFullYear(); // e.g., 2025
+
+  await renderCalendar();
+  
+
+  document.getElementById("closeModal").onclick = closeModal;
+  window.onclick = e => {
+    if (e.target === document.getElementById("eventModal")) closeModal();
+  };
+
+  const form = document.getElementById("eventForm");
+
+  form.onsubmit = async e => {
+    e.preventDefault();
+
+    const fd = new FormData(form);
+
+    const newEvent = {
+      title: fd.get("title"),
+      date: fd.get("date"),
+      time: fd.get("time") || null,
+      location: null,
+      description: null,
+      status: "pending"
+    };
+
+    try {
+      const { data, error } = await supabaseClient
+        .from("events")
+        .insert(newEvent);
+
+      if (error) {
+        console.error("Insert error:", error);
+        alert("Submission failed: " + error.message);
+      } else {
+        console.log("Insert success:", data);
+        alert("Event submitted for approval!");
+        form.reset();
+      }
+    } catch (err) {
+      console.error("Submission exception:", err);
+      alert("Submission failed: check console.");
     }
-
-    /* Weekday labels floating above calendar */
-    .weekday-labels {
-      display: flex;
-      justify-content: center;
-      margin-bottom: 2px;
-      background-color: transparent; /* transparent row background */
-    }
-
-    .weekday-labels div {
-      width: 115px; /* slightly narrower */
-      text-align: center;
-      font-weight: bold;
-      color: #ff5500; /* orange text */
-      border-bottom: 1px solid #555; /* visually connect to first row of days */
-      padding-bottom: 2px;
-      font-size: 12px;
-    }
-
-    /* Calendar grid */
-    #calendar {
-      display: grid;
-      grid-template-columns: repeat(7, 115px); /* slightly narrower */
-      grid-auto-rows: 100px;
-      gap: 2px;
-      margin: 0 auto 20px auto;
-      width: 805px; /* 7 * 115px + gaps */
-    }
-
-    .day {
-      border: 1px solid #555;
-      padding: 3px;
-      text-align: left;
-      position: relative;
-      overflow-y: auto;
-      background-color: #222;
-      font-size: 12px;
-    }
-
-    .date-number {
-      font-weight: bold;
-      margin-bottom: 3px;
-    }
-
-    .event-link {
-      display: block;
-      color: #0af;
-      text-decoration: underline;
-      cursor: pointer;
-      margin: 2px 0;
-      font-size: 0.9em;
-    }
-
-    /* Modal */
-    .modal {
-      display: none;
-      position: fixed;
-      z-index: 10;
-      left: 0;
-      top: 0;
-      width: 100%;
-      height: 100%;
-      overflow: auto;
-      background-color: rgba(0,0,0,0.7);
-    }
-
-    .modal-content {
-      background: #222;
-      color: #eee;
-      margin: 10% auto;
-      padding: 20px;
-      width: 280px;
-      border: 1px solid #555;
-      border-radius: 4px;
-      text-align: left;
-      font-size: 13px;
-    }
-
-    .close {
-      color: #aaa;
-      float: right;
-      font-size: 20px;
-      cursor: pointer;
-    }
-
-    /* Event submission form */
-    form {
-      max-width: 420px;
-      margin: 10px auto 30px auto;
-      text-align: left;
-    }
-
-    form input[type="text"],
-    form input[type="date"],
-    form input[type="time"],
-    form textarea,
-    form input[type="file"] {
-      width: 100%;
-      margin-bottom: 10px;
-      padding: 5px;
-      font-size: 13px;
-      background-color: #222;
-      color: #eee;
-      border: 1px solid #555;
-    }
-
-    form input::placeholder,
-    form textarea::placeholder {
-      color: #777;
-      font-style: italic;
-    }
-
-    form button {
-      width: 100%;
-      padding: 5px;
-      font-size: 13px;
-      background-color: #333;
-      color: #eee;
-      border: 1px solid #555;
-      cursor: pointer;
-    }
-
-    form button:hover {
-      background-color: #444;
-    }
-
-    /* Adjust spacing of form header */
-    h2#formHeader {
-      margin-top: 20px;
-      margin-bottom: 5px;
-      font-size: 16px;
-    }
-  </style>
-</head>
-<body>
-
-  <!-- Site Title -->
-  <h1 id="siteTitle">miami sound guide</h1>
-
-  <!-- Month and Year Header -->
-  <h2 id="monthYear"></h2>
-
-  <!-- Weekday Labels -->
-  <div class="weekday-labels">
-    <div>Sun</div>
-    <div>Mon</div>
-    <div>Tue</div>
-    <div>Wed</div>
-    <div>Thu</div>
-    <div>Fri</div>
-    <div>Sat</div>
-  </div>
-
-  <!-- Calendar Container -->
-  <div id="calendar"></div>
-
-  <!-- Modal for event details -->
-  <div id="eventModal" class="modal">
-    <div class="modal-content">
-      <span class="close" id="closeModal">&times;</span>
-      <div id="modalContent"></div>
-    </div>
-  </div>
-
-  <!-- Event Submission Form -->
-  <h2 id="formHeader">post a show</h2>
-  <form id="eventForm" enctype="multipart/form-data">
-    <input type="date" name="date" required>
-    <input type="time" name="time" required>
-    <input type="text" name="title" placeholder="whatever else you wanna say..." required minlength="5">
-    <div style="margin-bottom:10px;">
-      <label style="font-size:13px;">attach a flyer</label>
-      <input type="file" name="flyer" accept="image/*">
-    </div>
-    <button type="submit">Submit</button>
-  </form>
-
-  <!-- Supabase JS -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="script.js"></script>
-
-</body>
-</html>
+  };
+});

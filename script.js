@@ -3,49 +3,22 @@ let displayedYear;
 
 console.log("🔥 script.js loaded");
 
-// -------------------- 1. Initialize Supabase --------------------
 const SUPABASE_URL = "https://vzzzjrlbwpkgvhojdiyh.supabase.co";
 const SUPABASE_ANON_KEY = "sb_publishable_iuM31qKUIoyTETDonSKXJw_aIRrZ2i-";
+const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-const supabaseClient = supabase.createClient(
-  SUPABASE_URL,
-  SUPABASE_ANON_KEY
-);
-
-// -------------------- 2. Fetch approved events --------------------
 async function getApprovedEvents() {
-  try {
-    const { data, error } = await supabaseClient
-      .from("events")
-      .select("*")
-      .eq("status", "approved")
-      .order("date", { ascending: true });
+  const { data, error } = await supabaseClient
+    .from("events")
+    .select("*")
+    .eq("status", "approved");
 
-    if (error) {
-      console.error("Supabase fetch error:", error);
-      return [];
-    }
-
-    console.log("Approved events from Supabase:", data);
-    return data || [];
-  } catch (err) {
-    console.error("Supabase exception:", err);
-    return [];
-  }
+  return error ? [] : data;
 }
 
-// -------------------- 3. Render calendar --------------------
 async function renderCalendar() {
   const calendar = document.getElementById("calendar");
   calendar.innerHTML = "";
-
-  const currentMonth = month;
-  const currentYear = year;
-
-  console.log("Calendar rendering for:", {
-    month: currentMonth,
-    year: currentYear
-  });
 
   const monthNames = [
     "January","February","March","April","May","June",
@@ -53,120 +26,83 @@ async function renderCalendar() {
   ];
 
   document.getElementById("monthYear").textContent =
-    monthNames[currentMonth] + " " + currentYear;
+    `${monthNames[displayedMonth]} ${displayedYear}`;
 
-  const firstDay = new Date(currentYear, currentMonth, 1).getDay();
-  const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+  const firstDay = new Date(displayedYear, displayedMonth, 1).getDay();
+  const daysInMonth = new Date(displayedYear, displayedMonth + 1, 0).getDate();
 
-  // Empty placeholders
   for (let i = 0; i < firstDay; i++) {
-    const emptyDiv = document.createElement("div");
-    emptyDiv.className = "day";
-    calendar.appendChild(emptyDiv);
+    calendar.appendChild(document.createElement("div"));
   }
 
-  // Actual day cells
-  for (let day = 1; day <= daysInMonth; day++) {
-    const dayDiv = document.createElement("div");
-    dayDiv.className = "day";
-    dayDiv.dataset.day = day;
+  for (let d = 1; d <= daysInMonth; d++) {
+    const cell = document.createElement("div");
+    cell.className = "day";
+    cell.dataset.day = d;
 
-    const dn = document.createElement("div");
-    dn.className = "date-number";
-    dn.textContent = day;
-    dayDiv.appendChild(dn);
+    const num = document.createElement("div");
+    num.className = "date-number";
+    num.textContent = d;
+    cell.appendChild(num);
 
-    calendar.appendChild(dayDiv);
+    calendar.appendChild(cell);
   }
 
-  // Load approved events
   const events = await getApprovedEvents();
 
   events.forEach(ev => {
-    const evDate = new Date(ev.date + "T00:00:00");
-    const evDay = evDate.getUTCDate();
-    const evMonth = evDate.getUTCMonth();
-    const evYear = evDate.getUTCFullYear();
-
-    if (evMonth === currentMonth && evYear === currentYear) {
-      const dayDiv = Array.from(
-        calendar.querySelectorAll(".day[data-day]")
-      ).find(d => parseInt(d.dataset.day) === evDay);
-
-      if (dayDiv) {
+    const date = new Date(ev.date + "T00:00:00");
+    if (
+      date.getUTCMonth() === displayedMonth &&
+      date.getUTCFullYear() === displayedYear
+    ) {
+      const cell = calendar.querySelector(
+        `.day[data-day="${date.getUTCDate()}"]`
+      );
+      if (cell) {
         const link = document.createElement("span");
         link.className = "event-link";
         link.textContent = ev.title;
         link.onclick = () => openModal(ev);
-        dayDiv.appendChild(link);
+        cell.appendChild(link);
       }
     }
   });
 }
 
-// -------------------- 4. Modal --------------------
 function openModal(ev) {
-  const modal = document.getElementById("eventModal");
-  const content = document.getElementById("modalContent");
-
-  content.innerHTML = `
+  document.getElementById("modalContent").innerHTML = `
     <strong>${ev.title}</strong>
     <p>${ev.mod_post || "No post available."}</p>
   `;
-
-  modal.style.display = "block";
+  document.getElementById("eventModal").style.display = "block";
 }
 
-function closeModal() {
-  document.getElementById("eventModal").style.display = "none";
-}
-
-// -------------------- 5. DOM Ready --------------------
 document.addEventListener("DOMContentLoaded", async () => {
-  const today = new Date();
-  displayedMonth = today.getMonth();  // e.g., 11 for December
-  displayedYear = today.getFullYear(); // e.g., 2025
+  const now = new Date();
+  displayedMonth = now.getMonth();
+  displayedYear = now.getFullYear();
 
   await renderCalendar();
-  
 
-  document.getElementById("closeModal").onclick = closeModal;
-  window.onclick = e => {
-    if (e.target === document.getElementById("eventModal")) closeModal();
-  };
-
-  const form = document.getElementById("eventForm");
-
-  form.onsubmit = async e => {
-    e.preventDefault();
-
-    const fd = new FormData(form);
-
-    const newEvent = {
-      title: fd.get("title"),
-      date: fd.get("date"),
-      time: fd.get("time") || null,
-      location: null,
-      description: null,
-      status: "pending"
-    };
-
-    try {
-      const { data, error } = await supabaseClient
-        .from("events")
-        .insert(newEvent);
-
-      if (error) {
-        console.error("Insert error:", error);
-        alert("Submission failed: " + error.message);
-      } else {
-        console.log("Insert success:", data);
-        alert("Event submitted for approval!");
-        form.reset();
-      }
-    } catch (err) {
-      console.error("Submission exception:", err);
-      alert("Submission failed: check console.");
+  document.getElementById("nextMonth").onclick = async () => {
+    displayedMonth++;
+    if (displayedMonth > 11) {
+      displayedMonth = 0;
+      displayedYear++;
     }
+    await renderCalendar();
   };
+
+  document.getElementById("prevMonth").onclick = async () => {
+    displayedMonth--;
+    if (displayedMonth < 0) {
+      displayedMonth = 11;
+      displayedYear--;
+    }
+    await renderCalendar();
+  };
+
+  document.getElementById("closeModal").onclick =
+    () => document.getElementById("eventModal").style.display = "none";
 });
