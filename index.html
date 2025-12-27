@@ -2,55 +2,58 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Miami Sound Guide</title>
+  <title>Miami Sound Guide Calendar</title>
   <style>
-    /* Body & general font */
     body {
       font-family: Verdana, sans-serif;
       background-color: #111;
       color: #eee;
       text-align: center;
-      font-size: 12px;
+      font-size: 13px;
       margin: 0;
       padding: 0;
     }
 
-    /* Top header */
-    #siteHeader {
-      font-family: "Courier New", monospace;
-      font-size: 22px;
-      margin: 20px 0 5px 0;
-      color: #ff5500;
+    h1#siteTitle {
+      font-size: 24px;
+      margin: 20px 0 10px 0;
       text-transform: lowercase;
+      color: #ff5500; /* orange */
+      letter-spacing: 1px;
+      font-weight: bold; /* slightly bolder */
     }
 
-    /* Month/Year header */
-    #monthYear {
+    h2#monthYear {
       font-size: 16px;
-      margin-bottom: 5px;
+      margin: 10px 0 5px 0;
+    }
+
+    /* Weekday labels floating above calendar */
+    .weekday-labels {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 2px;
+      background-color: transparent; /* transparent row background */
+    }
+
+    .weekday-labels div {
+      width: 115px; /* slightly narrower */
+      text-align: center;
+      font-weight: bold;
+      color: #ff5500; /* orange text */
+      border-bottom: 1px solid #555; /* visually connect to first row of days */
+      padding-bottom: 2px;
+      font-size: 12px;
     }
 
     /* Calendar grid */
-    .calendar {
+    #calendar {
       display: grid;
-      grid-template-columns: repeat(7, 120px);
+      grid-template-columns: repeat(7, 115px); /* slightly narrower */
       grid-auto-rows: 100px;
-      gap: 0; /* remove gaps to connect header with days */
+      gap: 2px;
       margin: 0 auto 20px auto;
-      width: 840px; /* narrower */
-    }
-
-    .header {
-      font-weight: bold;
-      background-color: #333;
-      color: #ff6600;
-      border: 1px solid #555;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      height: 25px;        /* shorter row */
-      margin: 0;
-      padding: 0;
+      width: 805px; /* 7 * 115px + gaps */
     }
 
     .day {
@@ -59,9 +62,8 @@
       text-align: left;
       position: relative;
       overflow-y: auto;
-      height: 100px;
       background-color: #222;
-      font-size: 11px;
+      font-size: 12px;
     }
 
     .date-number {
@@ -117,25 +119,22 @@
       text-align: left;
     }
 
-    #formHeader {
-      font-size: 14px;
-      margin-bottom: 5px;
-    }
-
     form input[type="text"],
     form input[type="date"],
     form input[type="time"],
+    form textarea,
     form input[type="file"] {
       width: 100%;
       margin-bottom: 10px;
       padding: 5px;
-      font-size: 12px;
+      font-size: 13px;
       background-color: #222;
       color: #eee;
       border: 1px solid #555;
     }
 
-    form input::placeholder {
+    form input::placeholder,
+    form textarea::placeholder {
       color: #777;
       font-style: italic;
     }
@@ -143,7 +142,7 @@
     form button {
       width: 100%;
       padding: 5px;
-      font-size: 12px;
+      font-size: 13px;
       background-color: #333;
       color: #eee;
       border: 1px solid #555;
@@ -153,18 +152,36 @@
     form button:hover {
       background-color: #444;
     }
+
+    /* Adjust spacing of form header */
+    h2#formHeader {
+      margin-top: 20px;
+      margin-bottom: 5px;
+      font-size: 16px;
+    }
   </style>
 </head>
 <body>
 
-  <!-- Top site header -->
-  <div id="siteHeader">miami sound guide</div>
+  <!-- Site Title -->
+  <h1 id="siteTitle">miami sound guide</h1>
 
   <!-- Month and Year Header -->
-  <h1 id="monthYear"></h1>
+  <h2 id="monthYear"></h2>
+
+  <!-- Weekday Labels -->
+  <div class="weekday-labels">
+    <div>Sun</div>
+    <div>Mon</div>
+    <div>Tue</div>
+    <div>Wed</div>
+    <div>Thu</div>
+    <div>Fri</div>
+    <div>Sat</div>
+  </div>
 
   <!-- Calendar Container -->
-  <div id="calendar" class="calendar"></div>
+  <div id="calendar"></div>
 
   <!-- Modal for event details -->
   <div id="eventModal" class="modal">
@@ -175,13 +192,16 @@
   </div>
 
   <!-- Event Submission Form -->
-  <div id="formHeader">post a show</div>
+  <h2 id="formHeader">post a show</h2>
   <form id="eventForm" enctype="multipart/form-data">
     <input type="date" name="date" required>
     <input type="time" name="time" required>
-    <input type="text" name="title" placeholder="performer/performance/venue" required>
-    <label>attach a flyer <input type="file" name="flyer" accept="image/*"></label>
-    <button type="submit">Submit Event</button>
+    <input type="text" name="title" placeholder="whatever else you wanna say..." required minlength="5">
+    <div style="margin-bottom:10px;">
+      <label style="font-size:13px;">attach a flyer</label>
+      <input type="file" name="flyer" accept="image/*">
+    </div>
+    <button type="submit">Submit</button>
   </form>
 
   <!-- Supabase JS -->

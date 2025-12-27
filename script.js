@@ -1,3 +1,5 @@
+
+
 console.log("🔥 script.js loaded");
 
 // -------------------- 1. Initialize Supabase --------------------
@@ -49,18 +51,9 @@ async function renderCalendar() {
     "January","February","March","April","May","June",
     "July","August","September","October","November","December"
   ];
-  const dayNames = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
 
   document.getElementById("monthYear").textContent =
     monthNames[currentMonth] + " " + currentYear;
-
-  // Day headers
-  dayNames.forEach(d => {
-    const header = document.createElement("div");
-    header.className = "header";
-    header.textContent = d;
-    calendar.appendChild(header);
-  });
 
   const firstDay = new Date(currentYear, currentMonth, 1).getDay();
   const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
@@ -90,22 +83,10 @@ async function renderCalendar() {
   const events = await getApprovedEvents();
 
   events.forEach(ev => {
-    console.log("Processing event:", ev);
-
-    // Parse date safely (timezone-safe)
     const evDate = new Date(ev.date + "T00:00:00");
-
     const evDay = evDate.getUTCDate();
     const evMonth = evDate.getUTCMonth();
     const evYear = evDate.getUTCFullYear();
-
-    console.log("Parsed event date:", {
-      raw: ev.date,
-      parsed: evDate,
-      day: evDay,
-      month: evMonth,
-      year: evYear
-    });
 
     if (evMonth === currentMonth && evYear === currentYear) {
       const dayDiv = Array.from(
@@ -113,18 +94,12 @@ async function renderCalendar() {
       ).find(d => parseInt(d.dataset.day) === evDay);
 
       if (dayDiv) {
-        console.log("Placing event on day cell:", evDay);
-
         const link = document.createElement("span");
         link.className = "event-link";
         link.textContent = ev.title;
         link.onclick = () => openModal(ev);
         dayDiv.appendChild(link);
-      } else {
-        console.warn("No matching day cell for event:", evDay);
       }
-    } else {
-      console.warn("Event outside current month/year:", ev.title);
     }
   });
 }
@@ -164,25 +139,12 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     const fd = new FormData(form);
 
-    //   DEBUG: date coming out of the form
-    const rawDate = fd.get("date");
-    console.log("RAW date from form:", rawDate);
-    console.log("Type:", typeof rawDate);
-
-    const parsed = new Date(rawDate + "T00:00:00");
-    console.log("Parsed Date:", parsed);
-    console.log("Parsed components:", {
-      year: parsed.getUTCFullYear(),
-      month: parsed.getUTCMonth(),
-      day: parsed.getUTCDate()
-    });
-
     const newEvent = {
       title: fd.get("title"),
-      date: rawDate,
+      date: fd.get("date"),
       time: fd.get("time") || null,
-      location: fd.get("location") || null,
-      description: fd.get("description") || null,
+      location: null,
+      description: null,
       status: "pending"
     };
 
@@ -205,4 +167,3 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   };
 });
-
