@@ -111,7 +111,7 @@ function openModal(ev) {
 
   content.innerHTML = `
     <strong>${ev.title}</strong>
-    <p>${ev.moderator_post || "No post available."}</p>
+    <p>${ev.mod_post || "No post available."}</p>
   `;
 
   modal.style.display = "block";
