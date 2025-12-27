@@ -37,13 +37,10 @@ async function renderCalendar() {
   calendar.innerHTML = "";
 
   const today = new Date();
-  const currentMonth = today.getMonth(); // 0-based
+  const currentMonth = today.getMonth();
   const currentYear = today.getFullYear();
 
-  console.log("Calendar rendering for:", {
-    month: currentMonth,
-    year: currentYear
-  });
+  console.log("Calendar rendering for:", { month: currentMonth, year: currentYear });
 
   const monthNames = [
     "January","February","March","April","May","June",
@@ -77,6 +74,8 @@ async function renderCalendar() {
     const dayDiv = document.createElement("div");
     dayDiv.className = "day";
     dayDiv.dataset.day = day;
+    dayDiv.style.overflowY = "auto";      // scroll if too many events
+    dayDiv.style.fontSize = "0.8em";      // smaller text for multiple events
 
     const dn = document.createElement("div");
     dn.className = "date-number";
@@ -86,36 +85,30 @@ async function renderCalendar() {
     calendar.appendChild(dayDiv);
   }
 
-  // -------------------- FIXED EVENT PLACEMENT --------------------
+  // -------------------- Place approved events --------------------
   const events = await getApprovedEvents();
 
   events.forEach(ev => {
     console.log("Processing event:", ev);
 
-    // ev.date is "YYYY-MM-DD" — DO NOT use Date()
+    // parse date safely
     const [year, month, day] = ev.date.split("-").map(Number);
 
-    console.log("Parsed event date (string-safe):", {
-      year,
-      month, // 1-based
-      day
-    });
+    console.log("Parsed event date:", { year, month, day });
 
     if (year === currentYear && month - 1 === currentMonth) {
-      const dayDiv = calendar.querySelector(
-        `.day[data-day="${day}"]`
-      );
+      const dayDiv = calendar.querySelector(`.day[data-day="${day}"]`);
 
       if (dayDiv) {
-        console.log("Placing event on calendar:", ev.title, "→ day", day);
-
+        console.log("Placing event:", ev.title, "on day", day);
         const link = document.createElement("span");
         link.className = "event-link";
         link.textContent = ev.title;
+        link.style.fontSize = "0.8em";  // small but readable
         link.onclick = () => openModal(ev);
         dayDiv.appendChild(link);
       } else {
-        console.warn("No matching calendar cell for day:", day);
+        console.warn("No calendar cell for day:", day);
       }
     } else {
       console.warn("Event not in current month/year:", ev.title);
@@ -152,14 +145,13 @@ document.addEventListener("DOMContentLoaded", async () => {
   };
 
   const form = document.getElementById("eventForm");
-
   form.onsubmit = async e => {
     e.preventDefault();
 
     const fd = new FormData(form);
     const rawDate = fd.get("date");
 
-    // DEBUG: confirm form date
+    // DEBUG
     console.log("RAW date from form:", rawDate);
 
     const newEvent = {
@@ -172,9 +164,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     };
 
     try {
-      const { data, error } = await supabaseClient
-        .from("events")
-        .insert(newEvent);
+      const { data, error } = await supabaseClient.from("events").insert(newEvent);
 
       if (error) {
         console.error("Insert error:", error);
