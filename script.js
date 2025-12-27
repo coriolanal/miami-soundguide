@@ -1,4 +1,4 @@
-console.log("🔥 script.js loaded");
+console.log(" script.js loaded");
 
 // -------------------- 1. Initialize Supabase --------------------
 const SUPABASE_URL = "https://vzzzjrlbwpkgvhojdiyh.supabase.co";
@@ -37,7 +37,7 @@ async function renderCalendar() {
   calendar.innerHTML = "";
 
   const today = new Date();
-  const currentMonth = today.getMonth(); // 0-based
+  const currentMonth = today.getMonth();
   const currentYear = today.getFullYear();
 
   console.log("Calendar rendering for:", {
@@ -86,28 +86,34 @@ async function renderCalendar() {
     calendar.appendChild(dayDiv);
   }
 
-  // -------------------- FIXED EVENT PLACEMENT --------------------
+  // Load approved events
   const events = await getApprovedEvents();
 
   events.forEach(ev => {
     console.log("Processing event:", ev);
 
-    // ev.date is "YYYY-MM-DD" — DO NOT use Date()
-    const [year, month, day] = ev.date.split("-").map(Number);
+    // Parse date safely (timezone-safe)
+    const evDate = new Date(ev.date + "T00:00:00");
 
-    console.log("Parsed event date (string-safe):", {
-      year,
-      month, // 1-based
-      day
+    const evDay = evDate.getUTCDate();
+    const evMonth = evDate.getUTCMonth();
+    const evYear = evDate.getUTCFullYear();
+
+    console.log("Parsed event date:", {
+      raw: ev.date,
+      parsed: evDate,
+      day: evDay,
+      month: evMonth,
+      year: evYear
     });
 
-    if (year === currentYear && month - 1 === currentMonth) {
-      const dayDiv = calendar.querySelector(
-        `.day[data-day="${day}"]`
-      );
+    if (evMonth === currentMonth && evYear === currentYear) {
+      const dayDiv = Array.from(
+        calendar.querySelectorAll(".day[data-day]")
+      ).find(d => parseInt(d.dataset.day) === evDay);
 
       if (dayDiv) {
-        console.log("Placing event on calendar:", ev.title, "→ day", day);
+        console.log("Placing event on day cell:", evDay);
 
         const link = document.createElement("span");
         link.className = "event-link";
@@ -115,10 +121,10 @@ async function renderCalendar() {
         link.onclick = () => openModal(ev);
         dayDiv.appendChild(link);
       } else {
-        console.warn("No matching calendar cell for day:", day);
+        console.warn("No matching day cell for event:", evDay);
       }
     } else {
-      console.warn("Event not in current month/year:", ev.title);
+      console.warn("Event outside current month/year:", ev.title);
     }
   });
 }
@@ -157,10 +163,19 @@ document.addEventListener("DOMContentLoaded", async () => {
     e.preventDefault();
 
     const fd = new FormData(form);
-    const rawDate = fd.get("date");
 
-    // DEBUG: confirm form date
+    //   DEBUG: date coming out of the form
+    const rawDate = fd.get("date");
     console.log("RAW date from form:", rawDate);
+    console.log("Type:", typeof rawDate);
+
+    const parsed = new Date(rawDate + "T00:00:00");
+    console.log("Parsed Date:", parsed);
+    console.log("Parsed components:", {
+      year: parsed.getUTCFullYear(),
+      month: parsed.getUTCMonth(),
+      day: parsed.getUTCDate()
+    });
 
     const newEvent = {
       title: fd.get("title"),
@@ -190,3 +205,4 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   };
 });
+
