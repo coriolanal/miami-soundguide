@@ -74,11 +74,11 @@ async function renderCalendar() {
   // Load approved events
   const events = await getApprovedEvents();
   events.forEach(ev => {
-    // Parse date correctly to avoid timezone issues
-    const evDate = new Date(ev.date + "T00:00:00");
-    const evDay = evDate.getDate();
-    const evMonth = evDate.getMonth();
-    const evYear = evDate.getFullYear();
+    // Parse date safely for timezone issues
+    const evDate = new Date(ev.date + "T00:00:00"); 
+    const evDay = evDate.getUTCDate();
+    const evMonth = evDate.getUTCMonth();
+    const evYear = evDate.getUTCFullYear();
 
     if (evMonth === currentMonth && evYear === currentYear) {
       const dayDiv = Array.from(calendar.querySelectorAll('.day[data-day]'))
@@ -149,3 +149,4 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   };
 });
+
