@@ -32,7 +32,10 @@ async function renderCalendar() {
   const daysInMonth = new Date(displayedYear, displayedMonth + 1, 0).getDate();
 
   for (let i = 0; i < firstDay; i++) {
-    calendar.appendChild(document.createElement("div"));
+    const empty = document.createElement("div");
+    empty.className = "day";
+    empty.style.visibility = "hidden"; // keeps grid intact
+    calendar.appendChild(empty);
   }
 
   for (let d = 1; d <= daysInMonth; d++) {
