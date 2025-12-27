@@ -4,35 +4,141 @@
   <meta charset="UTF-8">
   <title>Supabase Event Calendar</title>
   <style>
-    body { font-family: Arial, sans-serif; text-align: center; }
-    h1 { margin-top: 20px; }
-
-    .calendar {
-      display: grid;
-      grid-template-columns: repeat(7, 100px);
-      grid-auto-rows: 80px;
-      gap: 2px;
-      margin: 20px auto;
+    /* Body & general font */
+    body {
+      font-family: Verdana, sans-serif;
+      background-color: #111;
+      color: #eee;
+      text-align: center;
+      font-size: 13px;
+      margin: 0;
+      padding: 0;
     }
 
-    .header { font-weight: bold; background: #ddd; line-height: 30px; }
-    .day { border: 1px solid #aaa; padding: 5px; text-align: left; position: relative; }
-    .date-number { font-weight: bold; margin-bottom: 5px; }
-    .event-link { display: block; color: blue; text-decoration: underline; cursor: pointer; margin: 2px 0; }
+    h1 {
+      margin-top: 20px;
+      font-size: 20px;
+    }
+
+    h2 {
+      font-size: 16px;
+      margin-top: 30px;
+    }
+
+    /* Calendar grid */
+    .calendar {
+      display: grid;
+      grid-template-columns: repeat(7, 120px);
+      grid-auto-rows: 100px;
+      gap: 2px;
+      margin: 20px auto;
+      width: 860px; /* 7 * 120px + gaps */
+    }
+
+    .header {
+      font-weight: bold;
+      background-color: #333;
+      color: #eee;
+      line-height: 25px;
+      border: 1px solid #555;
+    }
+
+    .day {
+      border: 1px solid #555;
+      padding: 3px;
+      text-align: left;
+      position: relative;
+      overflow-y: auto; /* Scroll if too many events */
+      height: 100px;
+      background-color: #222;
+      font-size: 12px;
+    }
+
+    .date-number {
+      font-weight: bold;
+      margin-bottom: 3px;
+    }
+
+    .event-link {
+      display: block;
+      color: #0af;
+      text-decoration: underline;
+      cursor: pointer;
+      margin: 2px 0;
+    }
 
     /* Modal */
     .modal {
-      display: none; position: fixed; z-index: 10; left:0; top:0; width:100%; height:100%;
-      overflow:auto; background-color: rgba(0,0,0,0.5);
+      display: none;
+      position: fixed;
+      z-index: 10;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      overflow: auto;
+      background-color: rgba(0,0,0,0.7);
     }
-    .modal-content {
-      background: #fff; margin:15% auto; padding:20px; width:300px;
-      border-radius:5px; text-align:left;
-    }
-    .close { color:#aaa; float:right; font-size:20px; cursor:pointer; }
 
-    form { max-width:500px; margin:20px auto; text-align:left; }
-    form input, form textarea, form button { width:100%; margin-bottom:10px; padding:5px; }
+    .modal-content {
+      background: #222;
+      color: #eee;
+      margin: 10% auto;
+      padding: 20px;
+      width: 280px;
+      border: 1px solid #555;
+      border-radius: 4px;
+      text-align: left;
+      font-size: 13px;
+    }
+
+    .close {
+      color: #aaa;
+      float: right;
+      font-size: 20px;
+      cursor: pointer;
+    }
+
+    /* Event submission form */
+    form {
+      max-width: 420px;
+      margin: 20px auto;
+      text-align: left;
+    }
+
+    form input[type="text"],
+    form input[type="date"],
+    form input[type="time"],
+    form textarea,
+    form input[type="file"] {
+      width: 100%;
+      margin-bottom: 10px;
+      padding: 5px;
+      font-size: 13px;
+      background-color: #222;
+      color: #eee;
+      border: 1px solid #555;
+    }
+
+    form input::placeholder,
+    form textarea::placeholder {
+      color: #777;
+      font-style: italic;
+    }
+
+    form button {
+      width: 100%;
+      padding: 5px;
+      font-size: 13px;
+      background-color: #333;
+      color: #eee;
+      border: 1px solid #555;
+      cursor: pointer;
+    }
+
+    form button:hover {
+      background-color: #444;
+    }
   </style>
 </head>
 <body>
@@ -53,18 +159,19 @@
 
   <!-- Event Submission Form -->
   <h2>Submit an Event</h2>
-  <form id="eventForm">
-    <label>Title<br><input type="text" name="title" required></label><br>
-    <label>Date<br><input type="date" name="date" required></label><br>
-    <label>Time<br><input type="time" name="time"></label><br>
-    <label>Location<br><input type="text" name="location"></label><br>
-    <label>Description<br><textarea name="description" rows="4"></textarea></label><br>
+  <form id="eventForm" enctype="multipart/form-data">
+    <input type="text" name="title" placeholder="Tell us about your show" required>
+    <input type="date" name="date" required>
+    <input type="time" name="time" required>
+    <input type="text" name="location" placeholder="Where is it happening?">
+    <textarea name="description" placeholder="Description / details..." rows="3"></textarea>
+    <input type="file" name="flyer" accept="image/*" placeholder="Shit event flyer too, why not">
     <button type="submit">Submit Event</button>
   </form>
 
   <!-- Supabase JS -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <!-- Corrected script.js -->
+  <!-- Your existing script.js -->
   <script src="script.js"></script>
 
 </body>
