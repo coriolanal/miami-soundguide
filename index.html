@@ -2,7 +2,7 @@
 <html>
 <head>
   <meta charset="UTF-8">
-  <title>My Calendar</title>
+  <title>Event Calendar</title>
 
   <style>
     body {
@@ -13,70 +13,156 @@
     .calendar {
       display: grid;
       grid-template-columns: repeat(7, 1fr);
-      max-width: 500px;
+      max-width: 700px;
       margin: 20px auto;
       gap: 5px;
     }
 
     .day {
       border: 1px solid #ccc;
-      padding: 10px;
-      min-height: 60px;
+      padding: 5px;
+      min-height: 100px;
+      text-align: left;
+    }
+
+    .date-number {
+      font-weight: bold;
+      margin-bottom: 5px;
+    }
+
+    .event {
+      background: #e6f0ff;
+      margin: 3px 0;
+      padding: 3px;
+      font-size: 12px;
+      cursor: pointer;
+      border-radius: 3px;
+    }
+
+    .event:hover {
+      background: #cce0ff;
     }
 
     .header {
       font-weight: bold;
       background: #f0f0f0;
+      text-align: center;
+    }
+
+    /* MODAL STYLES */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.5);
+    }
+
+    .modal-content {
+      background: white;
+      padding: 20px;
+      max-width: 400px;
+      margin: 100px auto;
+      border-radius: 5px;
+      text-align: left;
+    }
+
+    .close {
+      float: right;
+      cursor: pointer;
+      font-weight: bold;
     }
   </style>
 </head>
 
 <body>
 
-  <h1>September 2025</h1>
+<h1>September 2025</h1>
 
-  <div class="calendar">
-    <div class="header">Sun</div>
-    <div class="header">Mon</div>
-    <div class="header">Tue</div>
-    <div class="header">Wed</div>
-    <div class="header">Thu</div>
-    <div class="header">Fri</div>
-    <div class="header">Sat</div>
+<div class="calendar" id="calendar"></div>
 
-    <div class="day"></div>
-    <div class="day"></div>
-    <div class="day">1</div>
-    <div class="day">2</div>
-    <div class="day">3</div>
-    <div class="day">4</div>
-    <div class="day">5</div>
-    <div class="day">6</div>
-    <div class="day">7</div>
-    <div class="day">8</div>
-    <div class="day">9</div>
-    <div class="day">10</div>
-    <div class="day">11</div>
-    <div class="day">12</div>
-    <div class="day">13</div>
-    <div class="day">14</div>
-    <div class="day">15</div>
-    <div class="day">16</div>
-    <div class="day">17</div>
-    <div class="day">18</div>
-    <div class="day">19</div>
-    <div class="day">20</div>
-    <div class="day">21</div>
-    <div class="day">22</div>
-    <div class="day">23</div>
-    <div class="day">24</div>
-    <div class="day">25</div>
-    <div class="day">26</div>
-    <div class="day">27</div>
-    <div class="day">28</div>
-    <div class="day">29</div>
-    <div class="day">30</div>
+<!-- MODAL -->
+<div class="modal" id="eventModal">
+  <div class="modal-content">
+    <span class="close" onclick="closeModal()">✖</span>
+    <h2 id="modalTitle"></h2>
+    <p id="modalDescription"></p>
   </div>
+</div>
+
+<script>
+  // STEP 1: EVENT DATA
+  const events = [
+    {
+      date: "2025-09-12",
+      title: "Live Concert",
+      description: "Outdoor concert starting at 7pm."
+    },
+    {
+      date: "2025-09-12",
+      title: "Art Show",
+      description: "Local artists exhibition all day."
+    },
+    {
+      date: "2025-09-20",
+      title: "Community Meetup",
+      description: "Meet neighbors at the park at 3pm."
+    }
+  ];
+
+  const calendar = document.getElementById("calendar");
+
+  // STEP 2: CALENDAR HEADERS
+  const daysOfWeek = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+  daysOfWeek.forEach(day => {
+    const header = document.createElement("div");
+    header.className = "header";
+    header.textContent = day;
+    calendar.appendChild(header);
+  });
+
+  // SEPTEMBER 2025 STARTS ON MONDAY (1 EMPTY CELL FOR SUN)
+  calendar.appendChild(document.createElement("div"));
+
+  // STEP 3: CREATE DAYS
+  for (let day = 1; day <= 30; day++) {
+    const dayDiv = document.createElement("div");
+    dayDiv.className = "day";
+
+    const dateNumber = document.createElement("div");
+    dateNumber.className = "date-number";
+    dateNumber.textContent = day;
+    dayDiv.appendChild(dateNumber);
+
+    const dateString = `2025-09-${String(day).padStart(2, "0")}`;
+
+    // ADD EVENTS FOR THIS DAY
+    events
+      .filter(event => event.date === dateString)
+      .forEach(event => {
+        const eventDiv = document.createElement("div");
+        eventDiv.className = "event";
+        eventDiv.textContent = event.title;
+        eventDiv.onclick = () => openModal(event);
+        dayDiv.appendChild(eventDiv);
+      });
+
+    calendar.appendChild(dayDiv);
+  }
+
+  // STEP 4: MODAL FUNCTIONS
+  function openModal(event) {
+    document.getElementById("modalTitle").textContent = event.title;
+    document.getElementById("modalDescription").textContent = event.description;
+    document.getElementById("eventModal").style.display = "block";
+  }
+
+  function closeModal() {
+    document.getElementById("eventModal").style.display = "none";
+  }
+</script>
 
 </body>
 </html>
