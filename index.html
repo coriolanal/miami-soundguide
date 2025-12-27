@@ -2,8 +2,9 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Supabase Event Calendar</title>
+  <title>Miami Sound Guide Calendar</title>
   <style>
+    /* Body & general font */
     body {
       font-family: Verdana, sans-serif;
       background-color: #111;
@@ -14,35 +15,42 @@
       padding: 0;
     }
 
-    h1 {
-      margin-top: 20px;
+    /* Site title */
+    #siteTitle {
+      font-family: Verdana, sans-serif;
       font-size: 18px;
-    }
-
-    h2 {
-      font-size: 14px;
+      color: #f60;       /* fiery/grungy orange */
+      text-transform: lowercase;
+      letter-spacing: 1px;
       margin-top: 10px;
+      margin-bottom: 5px;
+      text-shadow: 1px 1px #000;
     }
 
+    /* Month/year header */
+    #monthYear {
+      font-size: 14px;
+      margin: 0 0 5px 0;
+    }
+
+    /* Calendar grid */
     .calendar {
       display: grid;
       grid-template-columns: repeat(7, 110px);
-      grid-auto-rows: 90px;
-      gap: 2px;
-      margin: 20px auto;
-      width: 770px;
+      grid-auto-rows: 90px;  /* slightly smaller rows */
+      gap: 0;                /* top row touches next row */
+      margin: 10px auto;
+      width: 770px;          /* 7*110px */
     }
 
     .header {
       font-weight: bold;
       background-color: #333;
-      color: #ff6600;
-      line-height: 8px;
+      color: #f60;           /* fiery orange */
+      line-height: 1.2em;     /* shorter so it touches next row */
       border: 1px solid #555;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 11px;
+      font-size: 12px;
+      padding: 3px;
     }
 
     .day {
@@ -50,7 +58,7 @@
       padding: 3px;
       text-align: left;
       position: relative;
-      overflow-y: auto;
+      overflow-y: auto; /* scroll if too many events */
       height: 90px;
       background-color: #222;
       font-size: 11px;
@@ -58,7 +66,7 @@
 
     .date-number {
       font-weight: bold;
-      margin-bottom: 2px;
+      margin-bottom: 3px;
     }
 
     .event-link {
@@ -67,8 +75,10 @@
       text-decoration: underline;
       cursor: pointer;
       margin: 1px 0;
+      font-size: 11px;
     }
 
+    /* Modal */
     .modal {
       display: none;
       position: fixed;
@@ -96,21 +106,28 @@
     .close {
       color: #aaa;
       float: right;
-      font-size: 18px;
+      font-size: 20px;
       cursor: pointer;
+    }
+
+    /* Event submission form */
+    h2 {
+      font-size: 14px;
+      margin-top: 15px;
+      margin-bottom: 5px;
     }
 
     form {
       max-width: 420px;
-      margin: 10px auto 30px auto;
+      margin: 0 auto 20px auto;
       text-align: left;
     }
 
     form input[type="text"],
     form input[type="date"],
     form input[type="time"],
-    form input[type="file"],
-    form textarea {
+    form textarea,
+    form input[type="file"] {
       width: 100%;
       margin-bottom: 10px;
       padding: 5px;
@@ -139,14 +156,28 @@
     form button:hover {
       background-color: #444;
     }
+
+    /* Align file input label */
+    .file-label {
+      display: inline-block;
+      margin-left: 5px;
+      font-size: 12px;
+      color: #eee;
+    }
   </style>
 </head>
 <body>
 
-  <h1 id="monthYear"></h1>
+  <!-- Site Title -->
+  <h1 id="siteTitle">miami sound guide</h1>
 
+  <!-- Month and Year Header -->
+  <h2 id="monthYear"></h2>
+
+  <!-- Calendar Container -->
   <div id="calendar" class="calendar"></div>
 
+  <!-- Modal for event details -->
   <div id="eventModal" class="modal">
     <div class="modal-content">
       <span class="close" id="closeModal">&times;</span>
@@ -154,21 +185,21 @@
     </div>
   </div>
 
-  <h2>Tell us about your show</h2>
+  <!-- Event Submission Form -->
+  <h2>tell us about your show</h2>
   <form id="eventForm" enctype="multipart/form-data">
+    <input type="text" name="title" placeholder="performer/performance/venue" minlength="3" required>
     <input type="date" name="date" required>
     <input type="time" name="time" required>
-    <input type="text" name="title" placeholder="Performer / Performance / Venue" minlength="3" required>
-    <div style="margin-bottom:10px;">
-      <label style="font-size:12px;">Attach a flyer (optional)</label>
+    <label>
       <input type="file" name="flyer" accept="image/*">
-    </div>
-    <button type="submit">Submit</button>
+      <span class="file-label">attach a flyer</span>
+    </label>
+    <button type="submit">submit</button>
   </form>
 
   <!-- Supabase JS -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <!-- Make sure script.js is in the same folder as this index.html -->
   <script src="script.js"></script>
 
 </body>
