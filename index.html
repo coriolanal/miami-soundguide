@@ -129,10 +129,20 @@
 </div>
 
 <h2 id="formHeader">post a show</h2>
-<form id="eventForm">
+<form id="eventForm" enctype="multipart/form-data">
   <input type="date" name="date" required>
   <input type="time" name="time">
-  <input type="text" name="title" required minlength="5">
+
+  <!-- Image upload (restored) -->
+  <input type="file" name="flyer" accept="image/*">
+
+  <!-- Two-line text input -->
+  <textarea
+    name="additional_info"
+    rows="2"
+    placeholder="additional info"
+  ></textarea>
+
   <button type="submit">Submit</button>
 </form>
 
