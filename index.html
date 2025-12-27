@@ -1,168 +1,67 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <meta charset="UTF-8">
-  <title>Event Calendar</title>
+<meta charset="UTF-8">
+<title>Supabase Event Calendar</title>
+<link rel="stylesheet" href="style.css">
+<style>
+body { font-family: Arial, sans-serif; text-align: center; }
+h1 { margin-top: 20px; }
 
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      text-align: center;
-    }
+.calendar {
+  display: grid;
+  grid-template-columns: repeat(7, 100px);
+  grid-auto-rows: 80px;
+  gap: 2px;
+  margin: 20px auto;
+}
 
-    .calendar {
-      display: grid;
-      grid-template-columns: repeat(7, 1fr);
-      max-width: 700px;
-      margin: 20px auto;
-      gap: 5px;
-    }
+.header { font-weight: bold; background: #ddd; line-height: 30px; }
+.day { border: 1px solid #aaa; padding: 5px; text-align: left; position: relative; }
+.date-number { font-weight: bold; margin-bottom: 5px; }
+.event-link { display: block; color: blue; text-decoration: underline; cursor: pointer; margin: 2px 0; }
 
-    .day {
-      border: 1px solid #ccc;
-      padding: 5px;
-      min-height: 100px;
-      text-align: left;
-    }
+/* Modal */
+.modal {
+  display: none; position: fixed; z-index: 10; left:0; top:0; width:100%; height:100%;
+  overflow:auto; background-color: rgba(0,0,0,0.5);
+}
+.modal-content {
+  background: #fff; margin:15% auto; padding:20px; width:300px;
+  border-radius:5px; text-align:left;
+}
+.close { color:#aaa; float:right; font-size:20px; cursor:pointer; }
 
-    .date-number {
-      font-weight: bold;
-      margin-bottom: 5px;
-    }
-
-    .event {
-      background: #e6f0ff;
-      margin: 3px 0;
-      padding: 3px;
-      font-size: 12px;
-      cursor: pointer;
-      border-radius: 3px;
-    }
-
-    .event:hover {
-      background: #cce0ff;
-    }
-
-    .header {
-      font-weight: bold;
-      background: #f0f0f0;
-      text-align: center;
-    }
-
-    /* MODAL STYLES */
-    .modal {
-      display: none;
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0,0,0,0.5);
-    }
-
-    .modal-content {
-      background: white;
-      padding: 20px;
-      max-width: 400px;
-      margin: 100px auto;
-      border-radius: 5px;
-      text-align: left;
-    }
-
-    .close {
-      float: right;
-      cursor: pointer;
-      font-weight: bold;
-    }
-  </style>
+form { max-width:500px; margin:20px auto; text-align:left; }
+form input, form textarea, form button { width:100%; margin-bottom:10px; padding:5px; }
+</style>
 </head>
-
 <body>
 
-<h1>September 2025</h1>
+<h1 id="monthYear"></h1>
+<div id="calendar" class="calendar"></div>
 
-<div class="calendar" id="calendar"></div>
-
-<!-- MODAL -->
-<div class="modal" id="eventModal">
+<!-- Modal for event details -->
+<div id="eventModal" class="modal">
   <div class="modal-content">
-    <span class="close" onclick="closeModal()">✖</span>
-    <h2 id="modalTitle"></h2>
-    <p id="modalDescription"></p>
+    <span class="close" id="closeModal">&times;</span>
+    <div id="modalContent"></div>
   </div>
 </div>
 
-<script>
-  // STEP 1: EVENT DATA
-  const events = [
-    {
-      date: "2025-09-12",
-      title: "Live Concert",
-      description: "Outdoor concert starting at 7pm."
-    },
-    {
-      date: "2025-09-12",
-      title: "Art Show",
-      description: "Local artists exhibition all day."
-    },
-    {
-      date: "2025-09-20",
-      title: "Community Meetup",
-      description: "Meet neighbors at the park at 3pm."
-    }
-  ];
+<h2>Submit an Event</h2>
+<form id="eventForm">
+  <label>Title<br><input type="text" name="title" required></label><br>
+  <label>Date<br><input type="date" name="date" required></label><br>
+  <label>Time<br><input type="time" name="time"></label><br>
+  <label>Location<br><input type="text" name="location"></label><br>
+  <label>Description<br><textarea name="description" rows="4"></textarea></label><br>
+  <button type="submit">Submit Event</button>
+</form>
 
-  const calendar = document.getElementById("calendar");
-
-  // STEP 2: CALENDAR HEADERS
-  const daysOfWeek = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
-  daysOfWeek.forEach(day => {
-    const header = document.createElement("div");
-    header.className = "header";
-    header.textContent = day;
-    calendar.appendChild(header);
-  });
-
-  // SEPTEMBER 2025 STARTS ON MONDAY (1 EMPTY CELL FOR SUN)
-  calendar.appendChild(document.createElement("div"));
-
-  // STEP 3: CREATE DAYS
-  for (let day = 1; day <= 30; day++) {
-    const dayDiv = document.createElement("div");
-    dayDiv.className = "day";
-
-    const dateNumber = document.createElement("div");
-    dateNumber.className = "date-number";
-    dateNumber.textContent = day;
-    dayDiv.appendChild(dateNumber);
-
-    const dateString = `2025-09-${String(day).padStart(2, "0")}`;
-
-    // ADD EVENTS FOR THIS DAY
-    events
-      .filter(event => event.date === dateString)
-      .forEach(event => {
-        const eventDiv = document.createElement("div");
-        eventDiv.className = "event";
-        eventDiv.textContent = event.title;
-        eventDiv.onclick = () => openModal(event);
-        dayDiv.appendChild(eventDiv);
-      });
-
-    calendar.appendChild(dayDiv);
-  }
-
-  // STEP 4: MODAL FUNCTIONS
-  function openModal(event) {
-    document.getElementById("modalTitle").textContent = event.title;
-    document.getElementById("modalDescription").textContent = event.description;
-    document.getElementById("eventModal").style.display = "block";
-  }
-
-  function closeModal() {
-    document.getElementById("eventModal").style.display = "none";
-  }
-</script>
+<!-- Supabase JS and external script.js -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="script.js"></script>
 
 </body>
 </html>
