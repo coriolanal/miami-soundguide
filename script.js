@@ -86,6 +86,35 @@ document.addEventListener("DOMContentLoaded", async () => {
   displayedMonth = now.getMonth();
   displayedYear = now.getFullYear();
 
+  const form = document.getElementById("eventForm");
+
+  form.onsubmit = async e => {
+    e.preventDefault();
+
+    const fd = new FormData(form);
+
+    // TEMP: use additional info as title so Supabase insert succeeds
+    const newEvent = {
+      title: fd.get("additional_info") || "Untitled submission",
+      date: fd.get("date"),
+      time: fd.get("time") || null,
+      status: "pending"
+    };
+
+    const { error } = await supabaseClient
+      .from("events")
+      .insert(newEvent);
+
+    if (error) {
+      console.error("Insert error:", error);
+      alert("Submission failed");
+    } else {
+      alert("Event submitted for approval!");
+      form.reset();
+    }
+  };
+
+
   await renderCalendar();
 
   document.getElementById("nextMonth").onclick = async () => {
