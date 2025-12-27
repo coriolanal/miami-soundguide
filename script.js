@@ -2,7 +2,7 @@ console.log("🔥 script.js loaded");
 
 // -------------------- 1. Initialize Supabase --------------------
 const SUPABASE_URL = "https://vzzzjrlbwpkgvhojdiyh.supabase.co";
-const SUPABASE_ANON_KEY = "YOUR_ANON_KEY_HERE"; // Keep your anon key
+const SUPABASE_ANON_KEY = "YOUR_ANON_KEY_HERE"; // Use your actual anon key
 const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 // -------------------- 2. Fetch approved events --------------------
@@ -33,7 +33,7 @@ async function renderCalendar(year = null, month = null) {
   calendar.innerHTML = "";
 
   const today = new Date();
-  const currentMonth = month !== null ? month : today.getMonth(); // 0-based
+  const currentMonth = month !== null ? month : today.getMonth();
   const currentYear = year !== null ? year : today.getFullYear();
 
   console.log("Rendering calendar for:", { month: currentMonth, year: currentYear });
@@ -42,30 +42,21 @@ async function renderCalendar(year = null, month = null) {
     "January","February","March","April","May","June",
     "July","August","September","October","November","December"
   ];
-  const dayNames = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
 
   document.getElementById("monthYear").textContent =
-    monthNames[currentMonth] + " " + currentYear;
+    `${monthNames[currentMonth]} ${currentYear}`;
 
-  // Day headers
-  dayNames.forEach(d => {
-    const header = document.createElement("div");
-    header.className = "header";
-    header.textContent = d;
-    calendar.appendChild(header);
-  });
-
-  const firstDay = new Date(currentYear, currentMonth, 1).getDay();
   const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+  const firstDay = new Date(currentYear, currentMonth, 1).getDay();
 
-  // Empty placeholders
+  // Create empty placeholders for first week
   for (let i = 0; i < firstDay; i++) {
     const emptyDiv = document.createElement("div");
     emptyDiv.className = "day";
     calendar.appendChild(emptyDiv);
   }
 
-  // Day cells
+  // Create day cells
   for (let day = 1; day <= daysInMonth; day++) {
     const dayDiv = document.createElement("div");
     dayDiv.className = "day";
@@ -79,13 +70,15 @@ async function renderCalendar(year = null, month = null) {
     calendar.appendChild(dayDiv);
   }
 
-  // Approved events
+  // -------------------- Place approved events --------------------
   const events = await getApprovedEvents();
+
   events.forEach(ev => {
-    // Parse YYYY-MM-DD string
+    if (!ev.date) return; // skip events with no date
+
     const [yearStr, monthStr, dayStr] = ev.date.split("-").map(Number);
     const evYear = yearStr;
-    const evMonth = monthStr - 1; // zero-based
+    const evMonth = monthStr - 1;
     const evDay = dayStr;
 
     if (evYear === currentYear && evMonth === currentMonth) {
@@ -94,6 +87,7 @@ async function renderCalendar(year = null, month = null) {
         const link = document.createElement("span");
         link.className = "event-link";
         link.textContent = ev.title;
+        link.style.fontSize = "0.9em";
         link.onclick = () => openModal(ev);
         dayDiv.appendChild(link);
       }
@@ -149,7 +143,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         console.log("Insert success:", data);
         alert("Event submitted for approval!");
         form.reset();
-        await renderCalendar(); // Refresh calendar after submission (if approved)
+        await renderCalendar(); // re-render calendar after submission
       }
     } catch (err) {
       console.error("Submission exception:", err);
