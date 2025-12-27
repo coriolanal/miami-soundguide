@@ -9,40 +9,53 @@
       background-color: #111;
       color: #eee;
       text-align: center;
-      font-size: 13px;
+      font-size: 12px; /* slightly smaller */
       margin: 0;
       padding: 0;
     }
 
-    h1 { margin-top: 20px; font-size: 20px; }
-    h2 { font-size: 16px; margin-top: 30px; }
+    h1 {
+      margin-top: 20px;
+      font-size: 18px; /* slightly smaller */
+    }
 
+    h2 {
+      font-size: 14px; /* slightly smaller */
+      margin-top: 10px; /* bring it closer to form */
+      margin-bottom: 5px;
+    }
+
+    /* Calendar grid */
     .calendar {
       display: grid;
-      grid-template-columns: repeat(7, 120px);
-      grid-auto-rows: 100px;
+      grid-template-columns: repeat(7, 110px);
+      grid-auto-rows: 90px;
       gap: 2px;
       margin: 20px auto;
-      width: 860px;
+      width: 780px;
     }
 
     .header {
       font-weight: bold;
       background-color: #333;
-      color: #eee;
-      line-height: 25px;
-      border: 1px solid #555;
+      color: #ff6600; /* fiery orange */
+      line-height: 8px;
+      border-bottom: none; /* connect to the first row of days */
+      border-left: 1px solid #555;
+      border-right: 1px solid #555;
+      height: 25px;
     }
 
     .day {
       border: 1px solid #555;
+      border-top: none; /* connect to header row */
       padding: 3px;
       text-align: left;
       position: relative;
       overflow-y: auto;
-      height: 100px;
+      height: 90px;
       background-color: #222;
-      font-size: 12px;
+      font-size: 11px; /* slightly smaller */
     }
 
     .date-number { font-weight: bold; margin-bottom: 3px; }
@@ -76,7 +89,7 @@
       border: 1px solid #555;
       border-radius: 4px;
       text-align: left;
-      font-size: 13px;
+      font-size: 12px;
     }
 
     .close {
@@ -86,28 +99,27 @@
       cursor: pointer;
     }
 
+    /* Event submission form */
     form {
       max-width: 420px;
-      margin: 20px auto;
+      margin: 0 auto 20px; /* form header closer */
       text-align: left;
     }
 
     form input[type="text"],
     form input[type="date"],
     form input[type="time"],
-    form textarea,
     form input[type="file"] {
       width: 100%;
       margin-bottom: 10px;
-      padding: 5px;
+      padding: 6px;
       font-size: 13px;
       background-color: #222;
       color: #eee;
       border: 1px solid #555;
     }
 
-    form input::placeholder,
-    form textarea::placeholder {
+    form input::placeholder {
       color: #777;
       font-style: italic;
     }
@@ -123,6 +135,13 @@
     }
 
     form button:hover { background-color: #444; }
+
+    label.file-label {
+      display: block;
+      margin-bottom: 10px;
+      font-size: 12px;
+      color: #ccc;
+    }
   </style>
 </head>
 <body>
@@ -137,18 +156,19 @@
     </div>
   </div>
 
-  <h2>Submit an Event</h2>
+  <h2>tell us about your show</h2>
   <form id="eventForm" enctype="multipart/form-data">
-    <input type="text" name="title" placeholder="Tell us about your show" required>
+    <input type="text" name="details" placeholder="performer/performance/venue" minlength="5" required>
     <input type="date" name="date" required>
     <input type="time" name="time" required>
-    <input type="text" name="location" placeholder="Where is it happening?">
-    <textarea name="description" placeholder="Description / details..." rows="3"></textarea>
-    <input type="file" name="flyer" accept="image/*" placeholder="Shit event flyer too, why not">
-    <button type="submit">Submit Event</button>
+    <label class="file-label">
+      attach a flyer
+      <input type="file" name="flyer" accept="image/*">
+    </label>
+    <button type="submit">Submit</button>
   </form>
 
-  <!-- Load Supabase and script.js after DOM -->
+  <!-- Supabase JS -->
   <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script defer src="script.js"></script>
 
