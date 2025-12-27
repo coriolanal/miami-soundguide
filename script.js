@@ -75,7 +75,7 @@ async function renderCalendar() {
   const events = await getApprovedEvents();
 
   events.forEach(ev => {
-    // Parse date safely to avoid timezone shifts
+    // Parse date safely
     const evDate = new Date(ev.date + "T00:00:00");
     if (evDate.getMonth() === currentMonth && evDate.getFullYear() === currentYear) {
       const dayDiv = Array.from(calendar.querySelectorAll('.day[data-day]'))
@@ -123,12 +123,13 @@ document.addEventListener("DOMContentLoaded", async () => {
   form.onsubmit = async e => {
     e.preventDefault();
     const fd = new FormData(form);
+
     const newEvent = {
       title: fd.get("title"),
-      date: fd.get("date"),
-      time: fd.get("time"),
-      location: fd.get("location"),
-      description: fd.get("description"),
+      date: fd.get("date"),                     // Must match Supabase 'date' column
+      time: fd.get("time") || null,             // Optional
+      location: fd.get("location") || null,     // Optional
+      description: fd.get("description") || null, // Optional
       status: "pending"
     };
 
@@ -136,15 +137,15 @@ document.addEventListener("DOMContentLoaded", async () => {
       const { data, error } = await supabaseClient.from("events").insert(newEvent);
       if (error) {
         console.error("Insert error:", error);
-        alert("Submission failed. Check console.");
+        alert("Submission failed: " + error.message);
       } else {
-        console.log("Submission successful:", data);
+        console.log("Insert success:", data);
         alert("Event submitted for approval!");
         form.reset();
       }
     } catch (err) {
       console.error("Submission exception:", err);
-      alert("Submission failed. Check console.");
+      alert("Submission failed: check console.");
     }
   };
 });
