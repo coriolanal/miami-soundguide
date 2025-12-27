@@ -1,4 +1,4 @@
-console.log(" script.js loaded");
+console.log("🔥 script.js loaded");
 
 // -------------------- 1. Initialize Supabase --------------------
 const SUPABASE_URL = "https://vzzzjrlbwpkgvhojdiyh.supabase.co";
