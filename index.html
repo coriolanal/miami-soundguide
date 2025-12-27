@@ -4,7 +4,6 @@
   <meta charset="UTF-8">
   <title>Supabase Event Calendar</title>
   <style>
-    /* Body & general font */
     body {
       font-family: Verdana, sans-serif;
       background-color: #111;
@@ -15,24 +14,16 @@
       padding: 0;
     }
 
-    h1 {
-      margin-top: 20px;
-      font-size: 20px;
-    }
+    h1 { margin-top: 20px; font-size: 20px; }
+    h2 { font-size: 16px; margin-top: 30px; }
 
-    h2 {
-      font-size: 16px;
-      margin-top: 30px;
-    }
-
-    /* Calendar grid */
     .calendar {
       display: grid;
       grid-template-columns: repeat(7, 120px);
       grid-auto-rows: 100px;
       gap: 2px;
       margin: 20px auto;
-      width: 860px; /* 7 * 120px + gaps */
+      width: 860px;
     }
 
     .header {
@@ -48,16 +39,13 @@
       padding: 3px;
       text-align: left;
       position: relative;
-      overflow-y: auto; /* Scroll if too many events */
+      overflow-y: auto;
       height: 100px;
       background-color: #222;
       font-size: 12px;
     }
 
-    .date-number {
-      font-weight: bold;
-      margin-bottom: 3px;
-    }
+    .date-number { font-weight: bold; margin-bottom: 3px; }
 
     .event-link {
       display: block;
@@ -67,7 +55,6 @@
       margin: 2px 0;
     }
 
-    /* Modal */
     .modal {
       display: none;
       position: fixed;
@@ -99,7 +86,6 @@
       cursor: pointer;
     }
 
-    /* Event submission form */
     form {
       max-width: 420px;
       margin: 20px auto;
@@ -136,20 +122,14 @@
       cursor: pointer;
     }
 
-    form button:hover {
-      background-color: #444;
-    }
+    form button:hover { background-color: #444; }
   </style>
 </head>
 <body>
 
-  <!-- Month and Year Header -->
   <h1 id="monthYear"></h1>
-
-  <!-- Calendar Container -->
   <div id="calendar" class="calendar"></div>
 
-  <!-- Modal for event details -->
   <div id="eventModal" class="modal">
     <div class="modal-content">
       <span class="close" id="closeModal">&times;</span>
@@ -157,7 +137,6 @@
     </div>
   </div>
 
-  <!-- Event Submission Form -->
   <h2>Submit an Event</h2>
   <form id="eventForm" enctype="multipart/form-data">
     <input type="text" name="title" placeholder="Tell us about your show" required>
@@ -169,10 +148,9 @@
     <button type="submit">Submit Event</button>
   </form>
 
-  <!-- Supabase JS -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <!-- Your existing script.js -->
-  <script src="script.js"></script>
+  <!-- Load Supabase and script.js after DOM -->
+  <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script defer src="script.js"></script>
 
 </body>
 </html>
