@@ -1,67 +1,72 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>Supabase Event Calendar</title>
-<link rel="stylesheet" href="style.css">
-<style>
-body { font-family: Arial, sans-serif; text-align: center; }
-h1 { margin-top: 20px; }
+  <meta charset="UTF-8">
+  <title>Supabase Event Calendar</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    body { font-family: Arial, sans-serif; text-align: center; }
+    h1 { margin-top: 20px; }
 
-.calendar {
-  display: grid;
-  grid-template-columns: repeat(7, 100px);
-  grid-auto-rows: 80px;
-  gap: 2px;
-  margin: 20px auto;
-}
+    .calendar {
+      display: grid;
+      grid-template-columns: repeat(7, 100px);
+      grid-auto-rows: 80px;
+      gap: 2px;
+      margin: 20px auto;
+    }
 
-.header { font-weight: bold; background: #ddd; line-height: 30px; }
-.day { border: 1px solid #aaa; padding: 5px; text-align: left; position: relative; }
-.date-number { font-weight: bold; margin-bottom: 5px; }
-.event-link { display: block; color: blue; text-decoration: underline; cursor: pointer; margin: 2px 0; }
+    .header { font-weight: bold; background: #ddd; line-height: 30px; }
+    .day { border: 1px solid #aaa; padding: 5px; text-align: left; position: relative; }
+    .date-number { font-weight: bold; margin-bottom: 5px; }
+    .event-link { display: block; color: blue; text-decoration: underline; cursor: pointer; margin: 2px 0; }
 
-/* Modal */
-.modal {
-  display: none; position: fixed; z-index: 10; left:0; top:0; width:100%; height:100%;
-  overflow:auto; background-color: rgba(0,0,0,0.5);
-}
-.modal-content {
-  background: #fff; margin:15% auto; padding:20px; width:300px;
-  border-radius:5px; text-align:left;
-}
-.close { color:#aaa; float:right; font-size:20px; cursor:pointer; }
+    /* Modal */
+    .modal {
+      display: none; position: fixed; z-index: 10; left:0; top:0; width:100%; height:100%;
+      overflow:auto; background-color: rgba(0,0,0,0.5);
+    }
+    .modal-content {
+      background: #fff; margin:15% auto; padding:20px; width:300px;
+      border-radius:5px; text-align:left;
+    }
+    .close { color:#aaa; float:right; font-size:20px; cursor:pointer; }
 
-form { max-width:500px; margin:20px auto; text-align:left; }
-form input, form textarea, form button { width:100%; margin-bottom:10px; padding:5px; }
-</style>
+    form { max-width:500px; margin:20px auto; text-align:left; }
+    form input, form textarea, form button { width:100%; margin-bottom:10px; padding:5px; }
+  </style>
 </head>
 <body>
 
-<h1 id="monthYear"></h1>
-<div id="calendar" class="calendar"></div>
+  <!-- Month and Year Header -->
+  <h1 id="monthYear"></h1>
 
-<!-- Modal for event details -->
-<div id="eventModal" class="modal">
-  <div class="modal-content">
-    <span class="close" id="closeModal">&times;</span>
-    <div id="modalContent"></div>
+  <!-- Calendar Container -->
+  <div id="calendar" class="calendar"></div>
+
+  <!-- Modal for event details -->
+  <div id="eventModal" class="modal">
+    <div class="modal-content">
+      <span class="close" id="closeModal">&times;</span>
+      <div id="modalContent"></div>
+    </div>
   </div>
-</div>
 
-<h2>Submit an Event</h2>
-<form id="eventForm">
-  <label>Title<br><input type="text" name="title" required></label><br>
-  <label>Date<br><input type="date" name="date" required></label><br>
-  <label>Time<br><input type="time" name="time"></label><br>
-  <label>Location<br><input type="text" name="location"></label><br>
-  <label>Description<br><textarea name="description" rows="4"></textarea></label><br>
-  <button type="submit">Submit Event</button>
-</form>
+  <!-- Event Submission Form -->
+  <h2>Submit an Event</h2>
+  <form id="eventForm">
+    <label>Title<br><input type="text" name="title" required></label><br>
+    <label>Date<br><input type="date" name="date" required></label><br>
+    <label>Time<br><input type="time" name="time"></label><br>
+    <label>Location<br><input type="text" name="location"></label><br>
+    <label>Description<br><textarea name="description" rows="4"></textarea></label><br>
+    <button type="submit">Submit Event</button>
+  </form>
 
-<!-- Supabase JS and external script.js -->
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="script.js"></script>
+  <!-- Supabase JS (only once) -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <!-- Your latest script.js -->
+  <script src="script.js"></script>
 
 </body>
 </html>
