@@ -19,7 +19,7 @@ async function getApprovedEvents() {
     }
     return data || [];
   } catch (err) {
-    console.error("Supabase error:", err);
+    console.error("Supabase exception:", err);
     return [];
   }
 }
@@ -39,7 +39,7 @@ async function renderCalendar() {
 
   document.getElementById("monthYear").textContent = monthNames[currentMonth] + " " + currentYear;
 
-  // Add day headers
+  // Day headers
   dayNames.forEach(d => {
     const header = document.createElement("div");
     header.className = "header";
@@ -50,14 +50,14 @@ async function renderCalendar() {
   const firstDay = new Date(currentYear, currentMonth, 1).getDay();
   const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
 
-  // Empty cells for previous month days
+  // Empty placeholders
   for (let i = 0; i < firstDay; i++) {
     const emptyDiv = document.createElement("div");
     emptyDiv.className = "day";
     calendar.appendChild(emptyDiv);
   }
 
-  // Add actual days
+  // Actual day cells
   for (let day = 1; day <= daysInMonth; day++) {
     const dayDiv = document.createElement("div");
     dayDiv.className = "day";
@@ -75,10 +75,12 @@ async function renderCalendar() {
   const events = await getApprovedEvents();
 
   events.forEach(ev => {
-    const evDate = new Date(ev.date);
+    // Parse date safely to avoid timezone shifts
+    const evDate = new Date(ev.date + "T00:00:00");
     if (evDate.getMonth() === currentMonth && evDate.getFullYear() === currentYear) {
-      const dayDiv = Array.from(calendar.querySelectorAll('.day'))
-        .find(d => d.dataset.day == evDate.getDate());
+      const dayDiv = Array.from(calendar.querySelectorAll('.day[data-day]'))
+        .find(d => parseInt(d.dataset.day) === evDate.getDate());
+
       if (dayDiv) {
         const link = document.createElement("span");
         link.className = "event-link";
@@ -90,7 +92,7 @@ async function renderCalendar() {
   });
 }
 
-// -------------------- 4. Modal popup --------------------
+// -------------------- 4. Modal --------------------
 function openModal(ev) {
   const modal = document.getElementById("eventModal");
   const content = document.getElementById("modalContent");
@@ -108,17 +110,15 @@ function closeModal() {
   document.getElementById("eventModal").style.display = "none";
 }
 
-// -------------------- 5. Initialize after DOM is ready --------------------
+// -------------------- 5. DOM Ready --------------------
 document.addEventListener("DOMContentLoaded", async () => {
-
-  // Render calendar
   await renderCalendar();
 
   // Modal handlers
   document.getElementById("closeModal").onclick = closeModal;
   window.onclick = e => { if (e.target === document.getElementById("eventModal")) closeModal(); }
 
-  // Form submission
+  // Event form submission
   const form = document.getElementById("eventForm");
   form.onsubmit = async e => {
     e.preventDefault();
@@ -133,11 +133,17 @@ document.addEventListener("DOMContentLoaded", async () => {
     };
 
     try {
-      await supabaseClient.from("events").insert(newEvent);
-      alert("Event submitted for approval!");
-      form.reset();
+      const { data, error } = await supabaseClient.from("events").insert(newEvent);
+      if (error) {
+        console.error("Insert error:", error);
+        alert("Submission failed. Check console.");
+      } else {
+        console.log("Submission successful:", data);
+        alert("Event submitted for approval!");
+        form.reset();
+      }
     } catch (err) {
-      console.error(err);
+      console.error("Submission exception:", err);
       alert("Submission failed. Check console.");
     }
   };
