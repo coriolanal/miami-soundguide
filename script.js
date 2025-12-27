@@ -1,4 +1,5 @@
-
+let displayedMonth;
+let displayedYear;
 
 console.log("🔥 script.js loaded");
 
@@ -38,9 +39,8 @@ async function renderCalendar() {
   const calendar = document.getElementById("calendar");
   calendar.innerHTML = "";
 
-  const today = new Date();
-  const currentMonth = today.getMonth();
-  const currentYear = today.getFullYear();
+  const currentMonth = month;
+  const currentYear = year;
 
   console.log("Calendar rendering for:", {
     month: currentMonth,
@@ -123,7 +123,12 @@ function closeModal() {
 
 // -------------------- 5. DOM Ready --------------------
 document.addEventListener("DOMContentLoaded", async () => {
+  const today = new Date();
+  displayedMonth = today.getMonth();  // e.g., 11 for December
+  displayedYear = today.getFullYear(); // e.g., 2025
+
   await renderCalendar();
+  
 
   document.getElementById("closeModal").onclick = closeModal;
   window.onclick = e => {
