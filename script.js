@@ -2,7 +2,7 @@ console.log("🔥 script.js loaded");
 
 // -------------------- 1. Initialize Supabase --------------------
 const SUPABASE_URL = "https://vzzzjrlbwpkgvhojdiyh.supabase.co";
-const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZ6enpqcmxid3BrZ3Zob2pkaXloIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY4NDExNzgsImV4cCI6MjA4MjQxNzE3OH0.4LSiWfKEOG13hFZDekZMHlWT0wUFoxb07IetgRZO5TY";
+const SUPABASE_ANON_KEY = "sb_publishable_iuM31qKUIoyTETDonSKXJw_aIRrZ2i-";
 
 const supabaseClient = supabase.createClient(
   SUPABASE_URL,
