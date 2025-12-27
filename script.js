@@ -1,8 +1,13 @@
+console.log("  script.js loaded");
+
 // -------------------- 1. Initialize Supabase --------------------
 const SUPABASE_URL = "https://vzzzjrlbwpkgvhojdiyh.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZ6enpqcmxid3BrZ3Zob2pkaXloIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY4NDExNzgsImV4cCI6MjA4MjQxNzE3OH0.4LSiWfKEOG13hFZDekZMHlWT0wUFoxb07IetgRZO5TY";
 
-const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const supabaseClient = supabase.createClient(
+  SUPABASE_URL,
+  SUPABASE_ANON_KEY
+);
 
 // -------------------- 2. Fetch approved events --------------------
 async function getApprovedEvents() {
@@ -17,6 +22,8 @@ async function getApprovedEvents() {
       console.error("Supabase fetch error:", error);
       return [];
     }
+
+    console.log("Approved events from Supabase:", data);
     return data || [];
   } catch (err) {
     console.error("Supabase exception:", err);
@@ -33,11 +40,19 @@ async function renderCalendar() {
   const currentMonth = today.getMonth();
   const currentYear = today.getFullYear();
 
-  const monthNames = ["January","February","March","April","May","June",
-                      "July","August","September","October","November","December"];
+  console.log("Calendar rendering for:", {
+    month: currentMonth,
+    year: currentYear
+  });
+
+  const monthNames = [
+    "January","February","March","April","May","June",
+    "July","August","September","October","November","December"
+  ];
   const dayNames = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
 
-  document.getElementById("monthYear").textContent = monthNames[currentMonth] + " " + currentYear;
+  document.getElementById("monthYear").textContent =
+    monthNames[currentMonth] + " " + currentYear;
 
   // Day headers
   dayNames.forEach(d => {
@@ -73,24 +88,43 @@ async function renderCalendar() {
 
   // Load approved events
   const events = await getApprovedEvents();
+
   events.forEach(ev => {
-    // Parse date safely for timezone issues
-    const evDate = new Date(ev.date + "T00:00:00"); 
+    console.log("Processing event:", ev);
+
+    // Parse date safely (timezone-safe)
+    const evDate = new Date(ev.date + "T00:00:00");
+
     const evDay = evDate.getUTCDate();
     const evMonth = evDate.getUTCMonth();
     const evYear = evDate.getUTCFullYear();
 
+    console.log("Parsed event date:", {
+      raw: ev.date,
+      parsed: evDate,
+      day: evDay,
+      month: evMonth,
+      year: evYear
+    });
+
     if (evMonth === currentMonth && evYear === currentYear) {
-      const dayDiv = Array.from(calendar.querySelectorAll('.day[data-day]'))
-        .find(d => parseInt(d.dataset.day) === evDay);
+      const dayDiv = Array.from(
+        calendar.querySelectorAll(".day[data-day]")
+      ).find(d => parseInt(d.dataset.day) === evDay);
 
       if (dayDiv) {
+        console.log("Placing event on day cell:", evDay);
+
         const link = document.createElement("span");
         link.className = "event-link";
         link.textContent = ev.title;
         link.onclick = () => openModal(ev);
         dayDiv.appendChild(link);
+      } else {
+        console.warn("No matching day cell for event:", evDay);
       }
+    } else {
+      console.warn("Event outside current month/year:", ev.title);
     }
   });
 }
@@ -106,6 +140,7 @@ function openModal(ev) {
     <p><em>${ev.date}${ev.time ? " " + ev.time : ""}</em></p>
     ${ev.location ? "<p>Location: " + ev.location + "</p>" : ""}
   `;
+
   modal.style.display = "block";
 }
 
@@ -118,15 +153,33 @@ document.addEventListener("DOMContentLoaded", async () => {
   await renderCalendar();
 
   document.getElementById("closeModal").onclick = closeModal;
-  window.onclick = e => { if (e.target === document.getElementById("eventModal")) closeModal(); }
+  window.onclick = e => {
+    if (e.target === document.getElementById("eventModal")) closeModal();
+  };
 
   const form = document.getElementById("eventForm");
+
   form.onsubmit = async e => {
     e.preventDefault();
+
     const fd = new FormData(form);
+
+    //   DEBUG: date coming out of the form
+    const rawDate = fd.get("date");
+    console.log("RAW date from form:", rawDate);
+    console.log("Type:", typeof rawDate);
+
+    const parsed = new Date(rawDate + "T00:00:00");
+    console.log("Parsed Date:", parsed);
+    console.log("Parsed components:", {
+      year: parsed.getUTCFullYear(),
+      month: parsed.getUTCMonth(),
+      day: parsed.getUTCDate()
+    });
+
     const newEvent = {
       title: fd.get("title"),
-      date: fd.get("date"),
+      date: rawDate,
       time: fd.get("time") || null,
       location: fd.get("location") || null,
       description: fd.get("description") || null,
@@ -134,7 +187,10 @@ document.addEventListener("DOMContentLoaded", async () => {
     };
 
     try {
-      const { data, error } = await supabaseClient.from("events").insert(newEvent);
+      const { data, error } = await supabaseClient
+        .from("events")
+        .insert(newEvent);
+
       if (error) {
         console.error("Insert error:", error);
         alert("Submission failed: " + error.message);
