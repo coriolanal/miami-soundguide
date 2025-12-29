@@ -129,25 +129,33 @@
 </div>
 
 <h2 id="formHeader">post a show</h2>
-<form id="eventForm" enctype="multipart/form-data">
+<form id="eventForm">
+
   <input type="date" name="date" required>
   <input type="time" name="time">
 
-  <!-- Image upload (restored) -->
-  <input type="file" name="flyer" accept="image/*">
+  <!-- IMAGE UPLOAD -->
+  <input
+    type="file"
+    name="flyer"
+    accept="image/*"
+    required
+  >
 
-  <!-- Two-line text input -->
+  <!-- TWO-LINE TEXT -->
   <textarea
     name="additional_info"
-    rows="2"
+    rows="1"
     placeholder="additional info"
   ></textarea>
 
   <button type="submit">Submit</button>
 </form>
 
+
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="script.js?v=2"></script>
 
 </body>
 </html>
+
