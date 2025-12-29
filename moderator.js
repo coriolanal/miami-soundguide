@@ -3,11 +3,7 @@ console.log("🛠 moderator.js loaded");
 // -------------------- 1. Initialize Supabase --------------------
 const SUPABASE_URL = "https://vzzzjrlbwpkgvhojdiyh.supabase.co";
 const SUPABASE_ANON_KEY = "sb_publishable_iuM31qKUIoyTETDonSKXJw_aIRrZ2i-";
-
-const supabaseClient = supabase.createClient(
-  SUPABASE_URL,
-  SUPABASE_ANON_KEY
-);
+const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 // -------------------- 2. Load pending events --------------------
 async function loadPending() {
@@ -48,26 +44,20 @@ async function loadPending() {
   // -------------------- 3. Render each pending event --------------------
   data.forEach(ev => {
     const card = document.createElement("div");
-    card.style.border = "1px solid #555";
-    card.style.padding = "10px";
-    card.style.marginBottom = "10px";
-    card.style.background = "#222";
+    card.className = "event";
 
-    // -------------------- Flyer image --------------------
+    // Flyer image
     let flyerHtml = "";
     if (ev.flyer) {
-      // Public bucket URL; adjust path to match your bucket name
       flyerHtml = `<img src="https://vzzzjrlbwpkgvhojdiyh.supabase.co/storage/v1/object/public/flyers/${ev.flyer}" 
-        alt="Event flyer" 
-        style="max-width:150px;display:block;margin:5px 0;">`;
+        alt="Event flyer">`;
     }
 
-    // -------------------- Additional info --------------------
+    // Additional info
     let additionalInfo = ev.additional_info
       ? `<p><strong>Additional info:</strong> ${ev.additional_info}</p>`
       : "";
 
-    // -------------------- User-submitted info fields --------------------
     card.innerHTML = `
       <strong>${ev.title}</strong><br>
       <em>${ev.date}${ev.time ? " " + ev.time : ""}</em><br><br>
@@ -75,24 +65,10 @@ async function loadPending() {
       ${flyerHtml}
       ${additionalInfo}
 
-      <p><strong>User submitted info:</strong></p>
-      <p>${ev.title || ""}</p>
-      <p>${ev.date || ""} ${ev.time || ""}</p>
-      <p>${ev.additional_info || ""}</p>
+      <label>Moderator post:</label>
+      <textarea data-id="${ev.id}" placeholder="Write the public post that will appear in the calendar popup...">${ev.mod_post || ""}</textarea>
 
-      <label style="display:block;margin-bottom:4px;">
-        Moderator post:
-      </label>
-      <textarea
-        data-id="${ev.id}"
-        rows="4"
-        style="width:100%;margin-bottom:6px;"
-        placeholder="Write the public post that will appear in the calendar popup..."
-      >${ev.mod_post || ""}</textarea>
-
-      <button data-approve="${ev.id}">
-        Approve & Publish
-      </button>
+      <button data-approve="${ev.id}">Approve & Publish</button>
     `;
 
     container.appendChild(card);
@@ -102,9 +78,7 @@ async function loadPending() {
   container.querySelectorAll("button[data-approve]").forEach(btn => {
     btn.onclick = async () => {
       const eventId = btn.dataset.approve;
-      const textarea = container.querySelector(
-        `textarea[data-id="${eventId}"]`
-      );
+      const textarea = container.querySelector(`textarea[data-id="${eventId}"]`);
       const modPost = textarea.value.trim();
 
       if (!modPost) {
@@ -135,6 +109,5 @@ async function loadPending() {
 // -------------------- 5. DOM Ready --------------------
 document.addEventListener("DOMContentLoaded", async () => {
   console.log("📄 moderator DOM ready");
-
   await loadPending();
 });
