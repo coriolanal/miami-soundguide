@@ -1,142 +1,17 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>Miami Sound Guide Calendar</title>
+<form id="eventForm">
 
-  <style>
-    body {
-      font-family: Verdana, sans-serif;
-      background-color: #111;
-      color: #eee;
-      text-align: center;
-      font-size: 13px;
-      margin: 0;
-      padding: 0;
-    }
-
-    h1#siteTitle {
-      font-size: 24px;
-      margin: 20px 0 10px 0;
-      text-transform: lowercase;
-      color: #ff5500;
-      letter-spacing: 1px;
-      font-weight: bold;
-    }
-
-    h2#monthYear {
-      font-size: 16px;
-      margin: 5px 0;
-    }
-
-    .month-nav button {
-      background: none;
-      border: 1px solid #555;
-      color: #ff5500;
-      padding: 3px 8px;
-      cursor: pointer;
-    }
-
-    .weekday-labels {
-      display: flex;
-      justify-content: center;
-      margin-bottom: 2px;
-    }
-
-    .weekday-labels div {
-      width: 115px;
-      text-align: center;
-      font-weight: bold;
-      color: #ff5500;
-      border-bottom: 1px solid #555;
-      font-size: 12px;
-    }
-
-    #calendar {
-      display: grid;
-      grid-template-columns: repeat(7, 115px);
-      grid-auto-rows: 100px;
-      gap: 2px;
-      margin: 0 auto 20px;
-      width: 805px;
-    }
-
-    .day {
-      border: 1px solid #555;
-      padding: 3px;
-      background-color: #222;
-      font-size: 12px;
-      overflow-y: auto;
-    }
-
-    .date-number {
-      font-weight: bold;
-      margin-bottom: 3px;
-    }
-
-    .event-link {
-      display: block;
-      color: #0af;
-      cursor: pointer;
-      text-decoration: underline;
-    }
-
-    .modal {
-      display: none;
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,.7);
-    }
-
-    .modal-content {
-      background: #222;
-      margin: 10% auto;
-      padding: 20px;
-      width: 280px;
-      border: 1px solid #555;
-    }
-
-    .close {
-      float: right;
-      cursor: pointer;
-    }
-  </style>
-</head>
-
-<body>
-
-<h1 id="siteTitle">miami sound guide</h1>
-
-<div class="month-nav">
-  <button id="prevMonth">&lt;</button>
-  <button id="nextMonth">&gt;</button>
-</div>
-
-<h2 id="monthYear"></h2>
-
-<div class="weekday-labels">
-  <div>Sun</div><div>Mon</div><div>Tue</div>
-  <div>Wed</div><div>Thu</div><div>Fri</div><div>Sat</div>
-</div>
-
-<div id="calendar"></div>
-
-<div id="eventModal" class="modal">
-  <div class="modal-content">
-    <span class="close" id="closeModal">&times;</span>
-    <div id="modalContent"></div>
-  </div>
-</div>
-
-<h2 id="formHeader">post a show</h2>
-<form id="eventForm" enctype="multipart/form-data">
   <input type="date" name="date" required>
   <input type="time" name="time">
 
-  <!-- Image upload (restored) -->
-  <input type="file" name="flyer" accept="image/*">
+  <!-- IMAGE UPLOAD -->
+  <input
+    type="file"
+    name="flyer"
+    accept="image/*"
+    required
+  >
 
-  <!-- Two-line text input -->
+  <!-- TWO-LINE TEXT -->
   <textarea
     name="additional_info"
     rows="2"
@@ -145,9 +20,3 @@
 
   <button type="submit">Submit</button>
 </form>
-
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="script.js?v=2"></script>
-
-</body>
-</html>
