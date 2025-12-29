@@ -1,3 +1,5 @@
+console.log("🛠 moderator.js loaded");
+
 const SUPABASE_URL = "https://vzzzjrlbwpkgvhojdiyh.supabase.co";
 const SUPABASE_ANON_KEY = "sb_publishable_iuM31qKUIoyTETDonSKXJw_aIRrZ2i-";
 
@@ -58,3 +60,4 @@ async function loadPending() {
 }
 
 loadPending();
+
