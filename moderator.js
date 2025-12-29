@@ -8,9 +8,9 @@ const supabaseClient = supabase.createClient(
 document.addEventListener("DOMContentLoaded", async () => {
 
   document.body.insertAdjacentHTML(
-  "beforeend",
-  "<p style='color:red'>JS RENDER TEST</p>"
-);
+    "beforeend",
+    "<p style='color:red'>JS RENDER TEST</p>"
+  );
 
   const container = document.getElementById("pendingEvents");
 
@@ -47,5 +47,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     container.appendChild(div);
   });
 });
+
 
 
