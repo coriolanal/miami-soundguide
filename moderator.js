@@ -6,6 +6,11 @@ const supabaseClient = supabase.createClient(
 );
 
 document.addEventListener("DOMContentLoaded", async () => {
+  document.body.insertAdjacentHTML(
+  "beforeend",
+  "<p style='color:red'>JS RENDER TEST</p>"
+);
+
   const container = document.getElementById("pendingEvents");
 
   const { data, error } = await supabaseClient
@@ -41,3 +46,4 @@ document.addEventListener("DOMContentLoaded", async () => {
     container.appendChild(div);
   });
 });
+
