@@ -13,7 +13,7 @@ const supabaseClient = supabase.createClient(
 async function loadPending() {
   const container = document.getElementById("pendingEvents");
 
-  // 🔒 Absolute safety check (prevents silent failure)
+  // Safety check
   if (!container) {
     console.error("❌ #pendingEvents not found in moderator.html");
     document.body.insertAdjacentHTML(
@@ -53,9 +53,26 @@ async function loadPending() {
     card.style.marginBottom = "10px";
     card.style.background = "#222";
 
+    // Flyer image (if exists)
+    let flyerHtml = "";
+    if (ev.flyer) {
+      // Replace YOUR_BUCKET_URL with your actual Supabase bucket public URL
+      flyerHtml = `<img src="https://vzzzjrlbwpkgvhojdiyh/storage/v1/object/public/flyers/${ev.flyer}" 
+        alt="Event flyer" 
+        style="max-width:150px;display:block;margin:5px 0;">`;
+    }
+
+    // Additional info (optional)
+    let additionalInfo = ev.additional_info
+      ? `<p><strong>Additional info:</strong> ${ev.additional_info}</p>`
+      : "";
+
     card.innerHTML = `
       <strong>${ev.title}</strong><br>
       <em>${ev.date}${ev.time ? " " + ev.time : ""}</em><br><br>
+
+      ${flyerHtml}
+      ${additionalInfo}
 
       <label style="display:block;margin-bottom:4px;">
         Moderator post:
@@ -65,7 +82,7 @@ async function loadPending() {
         rows="4"
         style="width:100%;margin-bottom:6px;"
         placeholder="Write the public post that will appear in the calendar popup..."
-      ></textarea>
+      >${ev.mod_post || ""}</textarea>
 
       <button data-approve="${ev.id}">
         Approve & Publish
