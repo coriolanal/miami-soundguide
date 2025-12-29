@@ -53,26 +53,32 @@ async function loadPending() {
     card.style.marginBottom = "10px";
     card.style.background = "#222";
 
-    // Flyer image (if exists)
+    // -------------------- Flyer image --------------------
     let flyerHtml = "";
     if (ev.flyer) {
-      // Replace YOUR_BUCKET_URL with your actual Supabase bucket public URL
-      flyerHtml = `<img src="https://vzzzjrlbwpkgvhojdiyh/storage/v1/object/public/flyers/${ev.flyer}" 
+      // Public bucket URL; adjust path to match your bucket name
+      flyerHtml = `<img src="https://vzzzjrlbwpkgvhojdiyh.supabase.co/storage/v1/object/public/flyers/${ev.flyer}" 
         alt="Event flyer" 
         style="max-width:150px;display:block;margin:5px 0;">`;
     }
 
-    // Additional info (optional)
+    // -------------------- Additional info --------------------
     let additionalInfo = ev.additional_info
       ? `<p><strong>Additional info:</strong> ${ev.additional_info}</p>`
       : "";
 
+    // -------------------- User-submitted info fields --------------------
     card.innerHTML = `
       <strong>${ev.title}</strong><br>
       <em>${ev.date}${ev.time ? " " + ev.time : ""}</em><br><br>
 
       ${flyerHtml}
       ${additionalInfo}
+
+      <p><strong>User submitted info:</strong></p>
+      <p>${ev.title || ""}</p>
+      <p>${ev.date || ""} ${ev.time || ""}</p>
+      <p>${ev.additional_info || ""}</p>
 
       <label style="display:block;margin-bottom:4px;">
         Moderator post:
