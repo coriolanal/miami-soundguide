@@ -1,64 +1,43 @@
-console.log("🛠 moderator.js loaded");
-
 const SUPABASE_URL = "https://vzzzjrlbwpkgvhojdiyh.supabase.co";
 const SUPABASE_ANON_KEY = "sb_publishable_iuM31qKUIoyTETDonSKXJw_aIRrZ2i-";
-
 const supabaseClient = supabase.createClient(
   SUPABASE_URL,
   SUPABASE_ANON_KEY
 );
 
-async function loadPending() {
+document.addEventListener("DOMContentLoaded", async () => {
+  const container = document.getElementById("pendingEvents");
+
   const { data, error } = await supabaseClient
     .from("events")
     .select("*")
     .eq("status", "pending")
-    .order("date");
+    .order("date", { ascending: true });
+
+  console.log("PENDING EVENTS:", data);
 
   if (error) {
-    console.error(error);
+    container.textContent = "Error loading events";
     return;
   }
 
-  const container = document.getElementById("pending");
-  container.innerHTML = "";
+  if (!data || data.length === 0) {
+    container.textContent = "No pending events.";
+    return;
+  }
 
   data.forEach(ev => {
     const div = document.createElement("div");
-    div.className = "event";
+    div.style.border = "1px solid #555";
+    div.style.margin = "10px";
+    div.style.padding = "10px";
 
     div.innerHTML = `
       <strong>${ev.title}</strong><br>
-      ${ev.date} ${ev.time || ""}<br>
-      ${ev.flyer_url ? `<img src="${ev.flyer_url}">` : ""}
-      <textarea placeholder="Write moderator post...">${ev.mod_post || ""}</textarea>
+      ${ev.date}<br><br>
       <button>Approve</button>
     `;
 
-    const textarea = div.querySelector("textarea");
-    const button = div.querySelector("button");
-
-    button.onclick = async () => {
-      const { error } = await supabaseClient
-        .from("events")
-        .update({
-          status: "approved",
-          mod_post: textarea.value
-        })
-        .eq("id", ev.id);
-
-      if (error) {
-        alert("Error approving");
-        console.error(error);
-      } else {
-        div.remove();
-      }
-    };
-
     container.appendChild(div);
   });
-}
-
-loadPending();
-
-console.log("PENDING EVENTS:", data);
+});
