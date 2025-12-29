@@ -34,7 +34,7 @@ async function renderCalendar() {
   for (let i = 0; i < firstDay; i++) {
     const empty = document.createElement("div");
     empty.className = "day";
-    empty.style.visibility = "hidden"; // keeps grid intact
+    empty.style.visibility = "hidden"; 
     calendar.appendChild(empty);
   }
 
@@ -74,10 +74,24 @@ async function renderCalendar() {
 }
 
 function openModal(ev) {
+  let flyerHtml = "";
+  if (ev.flyer) {
+    flyerHtml = `<img src="https://vzzzjrlbwpkgvhojdiyh.supabase.co/storage/v1/object/public/flyers/${ev.flyer}" 
+      alt="Event flyer" style="max-width:200px;display:block;margin:5px 0;">`;
+  }
+
+  let additionalInfo = ev.additional_info
+    ? `<p><strong>Additional info:</strong> ${ev.additional_info}</p>`
+    : "";
+
   document.getElementById("modalContent").innerHTML = `
-    <strong>${ev.title}</strong>
+    <strong>${ev.title}</strong><br>
+    <em>${ev.date}${ev.time ? " " + ev.time : ""}</em><br><br>
+    ${flyerHtml}
+    ${additionalInfo}
     <p>${ev.mod_post || "No post available."}</p>
   `;
+
   document.getElementById("eventModal").style.display = "block";
 }
 
@@ -89,59 +103,49 @@ document.addEventListener("DOMContentLoaded", async () => {
   const form = document.getElementById("eventForm");
 
   form.onsubmit = async e => {
-  e.preventDefault();
+    e.preventDefault();
+    const fd = new FormData(form);
+    const file = fd.get("flyer");
+    const additionalInfo = fd.get("additional_info");
 
-  const fd = new FormData(form);
-  const file = fd.get("flyer");
+    let flyerFileName = null;
 
-  if (!file || !file.name) {
-    alert("Please upload an image");
-    return;
-  }
+    if (file && file.name) {
+      const fileExt = file.name.split(".").pop();
+      flyerFileName = `${Date.now()}.${fileExt}`;
 
-  // Unique filename
-  const fileExt = file.name.split(".").pop();
-  const fileName = `${Date.now()}.${fileExt}`;
+      const { error: uploadError } = await supabaseClient
+        .storage
+        .from("flyers")
+        .upload(flyerFileName, file);
 
-  // Upload to storage
-  const { error: uploadError } = await supabaseClient
-    .storage
-    .from("flyers")
-    .upload(fileName, file);
+      if (uploadError) {
+        console.error(uploadError);
+        alert("Image upload failed");
+        return;
+      }
+    }
 
-  if (uploadError) {
-    console.error(uploadError);
-    alert("Image upload failed");
-    return;
-  }
+    const { error } = await supabaseClient
+      .from("events")
+      .insert({
+        date: fd.get("date"),
+        time: fd.get("time") || null,
+        title: fd.get("title") || "Untitled submission",
+        flyer: flyerFileName,
+        additional_info: additionalInfo || null,
+        status: "pending"
+      });
 
-  // Get public URL
-  const { data: urlData } = supabaseClient
-    .storage
-    .from("flyers")
-    .getPublicUrl(fileName);
-
-  const flyerUrl = urlData.publicUrl;
-
-  // Insert event
-  const { error } = await supabaseClient
-    .from("events")
-    .insert({
-      date: fd.get("date"),
-      time: fd.get("time") || null,
-      title: fd.get("additional_info") || "Untitled submission",
-      flyer_url: flyerUrl,
-      status: "pending"
-    });
-
-  if (error) {
-    console.error(error);
-    alert("Submission failed");
-  } else {
-    alert("Event submitted for approval!");
-    form.reset();
-  }
-};
+    if (error) {
+      console.error(error);
+      alert("Submission failed");
+    } else {
+      alert("Event submitted for approval!");
+      form.reset();
+      await renderCalendar();
+    }
+  };
 
   await renderCalendar();
 
@@ -166,4 +170,3 @@ document.addEventListener("DOMContentLoaded", async () => {
   document.getElementById("closeModal").onclick =
     () => document.getElementById("eventModal").style.display = "none";
 });
-
