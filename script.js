@@ -89,31 +89,59 @@ document.addEventListener("DOMContentLoaded", async () => {
   const form = document.getElementById("eventForm");
 
   form.onsubmit = async e => {
-    e.preventDefault();
+  e.preventDefault();
 
-    const fd = new FormData(form);
+  const fd = new FormData(form);
+  const file = fd.get("flyer");
 
-    // TEMP: use additional info as title so Supabase insert succeeds
-    const newEvent = {
-      title: fd.get("additional_info") || "Untitled submission",
+  if (!file || !file.name) {
+    alert("Please upload an image");
+    return;
+  }
+
+  // Unique filename
+  const fileExt = file.name.split(".").pop();
+  const fileName = `${Date.now()}.${fileExt}`;
+
+  // Upload to storage
+  const { error: uploadError } = await supabaseClient
+    .storage
+    .from("flyers")
+    .upload(fileName, file);
+
+  if (uploadError) {
+    console.error(uploadError);
+    alert("Image upload failed");
+    return;
+  }
+
+  // Get public URL
+  const { data: urlData } = supabaseClient
+    .storage
+    .from("flyers")
+    .getPublicUrl(fileName);
+
+  const flyerUrl = urlData.publicUrl;
+
+  // Insert event
+  const { error } = await supabaseClient
+    .from("events")
+    .insert({
       date: fd.get("date"),
       time: fd.get("time") || null,
+      title: fd.get("additional_info") || "Untitled submission",
+      flyer_url: flyerUrl,
       status: "pending"
-    };
+    });
 
-    const { error } = await supabaseClient
-      .from("events")
-      .insert(newEvent);
-
-    if (error) {
-      console.error("Insert error:", error);
-      alert("Submission failed");
-    } else {
-      alert("Event submitted for approval!");
-      form.reset();
-    }
-  };
-
+  if (error) {
+    console.error(error);
+    alert("Submission failed");
+  } else {
+    alert("Event submitted for approval!");
+    form.reset();
+  }
+};
 
   await renderCalendar();
 
@@ -138,3 +166,4 @@ document.addEventListener("DOMContentLoaded", async () => {
   document.getElementById("closeModal").onclick =
     () => document.getElementById("eventModal").style.display = "none";
 });
+
