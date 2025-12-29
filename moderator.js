@@ -61,3 +61,4 @@ async function loadPending() {
 
 loadPending();
 
+console.log("PENDING EVENTS:", data);
