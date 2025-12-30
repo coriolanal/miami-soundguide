@@ -132,7 +132,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         date: fd.get("date"),
         time: fd.get("time") || null,
         title: fd.get("title") || "Untitled submission",
-        flyer: flyer_url,
+        flyer_url: flyerFileName,
         additional_info: additionalInfo || null,
         status: "pending"
       });
@@ -170,4 +170,5 @@ document.addEventListener("DOMContentLoaded", async () => {
   document.getElementById("closeModal").onclick =
     () => document.getElementById("eventModal").style.display = "none";
 });
+
 
