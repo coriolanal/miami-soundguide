@@ -75,13 +75,13 @@ async function renderCalendar() {
 
 function openModal(ev) {
   let flyerHtml = "";
-  if (ev.flyer) {
-    flyerHtml = `<img src="https://vzzzjrlbwpkgvhojdiyh.supabase.co/storage/v1/object/public/flyers/${ev.flyer}" 
+  if (ev.flyer_url) {
+    flyerHtml = `<img src="https://vzzzjrlbwpkgvhojdiyh.supabase.co/storage/v1/object/public/flyers/${ev.flyer_url}" 
       alt="Event flyer" style="max-width:200px;display:block;margin:5px 0;">`;
   }
 
   let additionalInfo = ev.additional_info
-    ? `<p><strong>Additional info:</strong> ${ev.additional_info}</p>`
+    ? `<p><strong>additional info:</strong> ${ev.additional_info}</p>`
     : "";
 
   document.getElementById("modalContent").innerHTML = `
@@ -105,7 +105,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   form.onsubmit = async e => {
     e.preventDefault();
     const fd = new FormData(form);
-    const file = fd.get("flyer");
+    const file = fd.get("flyer_url");
     const additionalInfo = fd.get("additional_info");
 
     let flyerFileName = null;
@@ -132,7 +132,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         date: fd.get("date"),
         time: fd.get("time") || null,
         title: fd.get("title") || "Untitled submission",
-        flyer: flyerFileName,
+        flyer: flyer_url,
         additional_info: additionalInfo || null,
         status: "pending"
       });
@@ -170,3 +170,4 @@ document.addEventListener("DOMContentLoaded", async () => {
   document.getElementById("closeModal").onclick =
     () => document.getElementById("eventModal").style.display = "none";
 });
+
