@@ -48,7 +48,7 @@ async function loadPending() {
 
     // Flyer image
     let flyerHtml = "";
-    if (ev.flyer) {
+    if (ev.flyer_url) {
       flyerHtml = `<img src="https://vzzzjrlbwpkgvhojdiyh.supabase.co/storage/v1/object/public/flyers/${ev.flyer}" 
         alt="Event flyer">`;
     }
@@ -111,3 +111,4 @@ document.addEventListener("DOMContentLoaded", async () => {
   console.log("📄 moderator DOM ready");
   await loadPending();
 });
+
