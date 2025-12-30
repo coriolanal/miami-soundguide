@@ -38,19 +38,17 @@ async function loadPending() {
     return;
   }
 
-  // Clear loading message
   container.innerHTML = "";
 
-  // -------------------- 3. Render each pending event --------------------
   data.forEach(ev => {
     const card = document.createElement("div");
     card.className = "event";
+    card.style.background = "#222";
 
     // Flyer image
     let flyerHtml = "";
     if (ev.flyer_url) {
-      flyerHtml = `<img src="https://vzzzjrlbwpkgvhojdiyh.supabase.co/storage/v1/object/public/flyers/${ev.flyer}" 
-        alt="Event flyer">`;
+      flyerHtml = `<img src="${ev.flyer_url}" alt="Event flyer">`;
     }
 
     // Additional info
@@ -61,20 +59,18 @@ async function loadPending() {
     card.innerHTML = `
       <strong>${ev.title}</strong><br>
       <em>${ev.date}${ev.time ? " " + ev.time : ""}</em><br><br>
-
       ${flyerHtml}
       ${additionalInfo}
-
       <label>Moderator post:</label>
-      <textarea data-id="${ev.id}" placeholder="Write the public post that will appear in the calendar popup...">${ev.mod_post || ""}</textarea>
-
+      <textarea data-id="${ev.id}" placeholder="Write the public post for the calendar popup...">${ev.mod_post || ""}</textarea>
       <button data-approve="${ev.id}">Approve & Publish</button>
+      <button data-delete="${ev.id}" style="margin-left:5px;background:#550000;">Delete</button>
     `;
 
     container.appendChild(card);
   });
 
-  // -------------------- 4. Wire approve buttons --------------------
+  // -------------------- 3. Wire approve buttons --------------------
   container.querySelectorAll("button[data-approve]").forEach(btn => {
     btn.onclick = async () => {
       const eventId = btn.dataset.approve;
@@ -88,10 +84,7 @@ async function loadPending() {
 
       const { error } = await supabaseClient
         .from("events")
-        .update({
-          status: "approved",
-          mod_post: modPost
-        })
+        .update({ status: "approved", mod_post: modPost })
         .eq("id", eventId);
 
       if (error) {
@@ -100,8 +93,30 @@ async function loadPending() {
         return;
       }
 
-      // Reload list after approval
-      await loadPending();
+      // Remove approved event from dashboard
+      btn.closest(".event").remove();
+    };
+  });
+
+  // -------------------- 4. Wire delete buttons --------------------
+  container.querySelectorAll("button[data-delete]").forEach(btn => {
+    btn.onclick = async () => {
+      const eventId = btn.dataset.delete;
+      if (!confirm("Are you sure you want to delete this event?")) return;
+
+      const { error } = await supabaseClient
+        .from("events")
+        .delete()
+        .eq("id", eventId);
+
+      if (error) {
+        alert("Delete failed. See console.");
+        console.error(error);
+        return;
+      }
+
+      // Remove deleted event from dashboard
+      btn.closest(".event").remove();
     };
   });
 }
@@ -111,4 +126,3 @@ document.addEventListener("DOMContentLoaded", async () => {
   console.log("📄 moderator DOM ready");
   await loadPending();
 });
-
